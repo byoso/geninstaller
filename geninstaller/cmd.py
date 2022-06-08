@@ -57,19 +57,20 @@ def search(name, *args):
 
 
 def uninstall(*args):
-    # name = name
+    name = ""
+    for arg in args:
     print(args)
-    # if no_db():
-    #     return
-    # db = DB(
-    #     file=DB_FILE,
-    #     base=GI_DIR,
-    #     migrations_dir="None",  # delete with silly-db v 1.1.3
-    # )
-    # App = db.model("application")
-    # apps = App.filter(f"name='{name}'")
-    # if len(apps) > 1:
-    #     apps[0].delete()
+    if no_db():
+        return
+    db = DB(
+        file=DB_FILE,
+        base=GI_DIR,
+        migrations_dir="None",  # delete with silly-db v 1.1.3
+    )
+    App = db.model("application")
+    apps = App.filter(f"name='{name}'")
+    if len(apps) > 1:
+        apps[0].delete()
 
 
 
