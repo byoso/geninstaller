@@ -68,12 +68,10 @@ def install(data):
         'base_dir': data['base_dir']
 
     }
-    try:
-        App.insert(**cleaned_datas)
-        create_dir(cleaned_datas)
-        create_desktop(cleaned_datas)
-    except:
-        print(f"{c.danger}!! Installation issue !!{c.end}")
+    # finallization:
+    App.insert(**cleaned_datas)
+    create_dir(cleaned_datas)
+    create_desktop(cleaned_datas)
 
     print(
         f"{c.success}geninstaller has successfuly installed "

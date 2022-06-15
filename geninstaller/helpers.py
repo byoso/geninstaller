@@ -73,8 +73,9 @@ def clean_name(name):
 
 
 def create_desktop(datas):
+    """Create the .desktop file and copy it to ~/.local/share/applications"""
     file_name = datas['applications']
-    base_dir = datas['base_dir']
+    # base_dir = datas['base_dir']
     destination_dir = datas['applications_files']
 
     name = datas['name']
@@ -93,16 +94,18 @@ def create_desktop(datas):
         f"Type=Application\n"
         f"Categories={categories}\n"
         )
-    print("=== file ",file_name)
-    print("=== base dir ",base_dir)
-    print("=== destination dir ",destination_dir)
-    print(content)
+    # print("=== file ",file_name)
+    # print("=== base dir ",base_dir)
+    # print("=== destination dir ",destination_dir)
+    # print(content)
     with open(file_name, "w") as file:
         file.write(content)
     set_executable(file_name)
 
 
 def create_dir(datas):
+    """Copy all the files in the root directory of the app to its
+    right place, and ensure that the exec file is set 'executable'"""
     base_dir = datas['base_dir']
     destination_dir = datas['applications_files']
     shutil.copytree(
