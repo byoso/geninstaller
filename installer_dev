@@ -10,7 +10,7 @@ Just complete the informations asked below, the magic will do the rest.
 import os
 import pkg_resources
 dependencies = [
-    'flamewok>=1.0.7',  # to replace with geninstaller
+    'flamewok>=1.0.7',  # to replace with geninstaller instead
 ]
 clean_up = False
 try:
@@ -23,23 +23,21 @@ from flamewok.helpers import clear
 from geninstaller import core
 
 
-
-DEV = True  # delete in non dev version
-
+# PLACE THIS FILE IN THE ROOT DIRECTORY OF YOUR PROJECT
 
 # =====================================================================
 # ======= Complete this informations ==================================
 
-# choose a good name
-NAME = "Porn tube"
+# choose a good name, do NOT use underscores here
+NAME = "fake application"
 # short description (optionnal), a few words would be fine
-DESCRIPTION = "Du sport !"
+DESCRIPTION = "A fake application for testing"
 # The main executable file of the application
 # path relative to this directory (BASE_DIR defined below)
-EXECUTABLE = "some exec path"
+EXECUTABLE = "fake/fake.py"
 # The icon that your system will use (optionnal, but so much better)
 # path relative to this direcotry (BASE_DIR defined below)
-ICON = "icon path"
+ICON = "fake/icon.png"
 # Does your application needs to appear within a terminal ?
 # (usually, a graphical application doesn't need a terminal)
 TERMINAL = False
@@ -49,12 +47,12 @@ TERMINAL = False
 CATEGORIES = [
     # "AudioVideo",
     # "Audio",
-    # "Video",
+    "Video",
     # "Development",
-    "Education",
-    "Game",
+    # "Education",
+    # "Game",
     # "Graphics",
-    # "Network",
+    "Network",
     # "Office",
     # "Settings",
     # "Utility",
@@ -77,7 +75,10 @@ datas = {
 
 
 def install():
+    """installs geninstaller's database on the system,
+     if not already installed. Absolutely required !"""
     core.autoinstall()
+    # and then installs your application
     core.install(datas)
 
 

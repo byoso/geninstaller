@@ -6,6 +6,7 @@ from flamewok.cli import cli
 from silly_db.db import DB
 
 from geninstaller import __version__
+from geninstaller import core
 from geninstaller.helpers import (
     BASE_DIR,
     GI_DIR,
@@ -24,7 +25,7 @@ def list(*args):
     db = DB(
         file=DB_FILE,
         base=GI_DIR,
-        migrations_dir="None",  # delete with silly-db v 1.1.3
+        # migrations_dir="None",  # delete with silly-db v 1.1.4
     )
     App = db.model("application")
     apps = App.all()
@@ -32,6 +33,7 @@ def list(*args):
 
 
 def open_geninstaller_dir(*args):
+    """Directory where the database is installed localy"""
     if no_db():
         return
     os.system(f"xdg-open {GI_DIR}")
@@ -50,38 +52,23 @@ def search(name, *args):
     db = DB(
         file=DB_FILE,
         base=GI_DIR,
-        migrations_dir="None",  # delete with silly-db v 1.1.3
+        # migrations_dir="None",  # delete with silly-db v 1.1.3
     )
     apps = db.select(f"* FROM application WHERE name LIKE '%{name}%'")
     display_list(apps)
 
 
-def uninstall(*args):
-    name = ""
-    for arg in args:
-    print(args)
-    if no_db():
-        return
-    db = DB(
-        file=DB_FILE,
-        base=GI_DIR,
-        migrations_dir="None",  # delete with silly-db v 1.1.3
-    )
-    App = db.model("application")
-    apps = App.filter(f"name='{name}'")
-    if len(apps) > 1:
-        apps[0].delete()
-
-
-
 def cmd():
     routes = [
-        "program: Geninstaller",
+        "program: geninstaller",
         f"version: {__version__}",
         "HELP",
         ("-h", cli.help, "display this help"),
+        ("--help", cli.help, "idem"),
         "ACTIONS",
-        ('uninstall <name>', uninstall, "uninstall an application with its exact name"),
+        ('uninstall <name>', core.uninstall, (
+            "uninstall an application with its exact name, "
+            "use '' if the 'app name' contains a blank space")),
         ('list', list, "list the installed applications"),
         ('search <name>', search,
             "search an application with an approximate name"),
