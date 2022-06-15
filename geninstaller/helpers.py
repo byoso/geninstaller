@@ -1,6 +1,12 @@
+
+"""The helpers are mainly functions shared with the other parts of
+geninstaller"""
+
+
 import os
 import stat
 import shutil
+from distutils.dir_util import copy_tree
 
 from silly_db.db import DB
 
@@ -15,25 +21,19 @@ APP_DIR = os.path.expanduser(
 DB_FILE = os.path.expanduser(
     "~/.local/share/applications-files/.geninstaller/gi_db.sqlite3")
 
-# pre built database
-gi_db = DB(
-        file=DB_FILE,
-        base=GI_DIR,
-    )
+
+def autoinstall():
+    """install the empty database"""
+    if not os.path.exists(DB_FILE):
+        copy_tree(
+            BASE_DIR+'/plop/database', GI_DIR)
+        print("geninstaller database initialized")
 
 
 def set_executable(file) -> None:
     """set a file executable"""
     st = os.stat(file)
     os.chmod(file, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
-# def valid_icon_path(string):
-#     valid = string.strip().strip("'")
-#     return valid
-
-# def valid_exec_path(string):
-#     valid = string.strip().strip("'").replace(" ", "\\ ")
-#     return valid
 
 
 def no_db():
@@ -45,10 +45,20 @@ def no_db():
         return False
 
 
+def get_db():
+    if no_db:
+        autoinstall()
+    gi_db = DB(
+            file=DB_FILE,
+            base=GI_DIR,
+        )
+    return gi_db
+
+
 def display_list(apps):
     """apps are a silly-db Selection"""
     if len(apps) == 0:
-        print("No result found")
+        print("No geninstaller application found")
         return
     print("="*119)
     print(f"{'Application':<45}|{'terminal ? ':^12}|{'Categories':<60}|")
@@ -77,13 +87,13 @@ def create_desktop(datas):
     file_name = datas['applications']
     # base_dir = datas['base_dir']
     destination_dir = datas['applications_files']
-
     name = datas['name']
     exec = os.path.join(destination_dir, datas['exec'])
     icon = os.path.join(destination_dir, datas['icon'])
     comment = datas['comment']
     terminal = datas['terminal']
     categories = datas['categories']
+    desktop_categories = categories.replace(";", "/")
     content = (
         "[Desktop Entry]\n"
         f"Name={name}\n"
@@ -92,12 +102,8 @@ def create_desktop(datas):
         f"Exec={exec}\n"
         f"Terminal={terminal}\n"
         f"Type=Application\n"
-        f"Categories={categories}\n"
+        f"Categories={desktop_categories}\n"
         )
-    # print("=== file ",file_name)
-    # print("=== base dir ",base_dir)
-    # print("=== destination dir ",destination_dir)
-    # print(content)
     with open(file_name, "w") as file:
         file.write(content)
     set_executable(file_name)

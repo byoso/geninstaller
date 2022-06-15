@@ -1,12 +1,11 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
-"""Example of an embryonic main.py file, this should be included in
-a MCV designed program"""
+"""The core of geninstaller consist mostly in install and uninstall
+applications"""
 
 import os
 import shutil
-from distutils.dir_util import copy_tree
 
 from flamewok import color as c
 
@@ -16,25 +15,17 @@ from geninstaller.helpers import (
     APP_FILES_DIR,
     APP_DIR,
     DB_FILE,
-    no_db,
-    gi_db,
-    display_list,
+    get_db,
     clean_name,
     create_desktop,
     create_dir,
 )
 
 
-def autoinstall():
-    """install the empty database"""
-    if not os.path.exists(DB_FILE):
-        copy_tree(
-            BASE_DIR+'/plop/database', GI_DIR)
-        print("geninstaller database initialized")
-
-
 def install(data):
-
+    """Prepares the data before finalization"""
+    # first, some data check
+    gi_db = get_db()
     App = gi_db.model("application")
     app = App.filter(f"name='{data['name']}'")
     if len(app) > 0:
@@ -47,16 +38,21 @@ def install(data):
     if "_" in data['name']:
         print(f"{c.warning}Undersocres are not allowed for an app name{c.end}")
         return
+    if type(data['terminal']) != bool:
+        print(f"{c.warning}The 'TERMINAL' value must be a boolean{c.end}")
+        return
+
     categories = ""
     for category in data['categories']:
-        categories += category + ";"
+        categories += category + "/"
     applications_files = APP_FILES_DIR + clean_name(data['name'])
     applications = APP_DIR + clean_name(data['name']) + ".desktop"
     if data['terminal']:
         terminal = "true"
     else:
         terminal = "false"
-    cleaned_datas = {
+
+    db_datas = {
         'name': data['name'],
         'exec': data['exec'],
         'comment': data['comment'],
@@ -65,11 +61,14 @@ def install(data):
         'categories': categories,
         'applications_files': applications_files,
         'applications': applications,
-        'base_dir': data['base_dir']
 
     }
+    cleaned_datas = {
+        'base_dir': data['base_dir'],
+        **db_datas
+    }
     # finallization:
-    App.insert(**cleaned_datas)
+    App.insert(**db_datas)
     create_dir(cleaned_datas)
     create_desktop(cleaned_datas)
 
@@ -81,14 +80,17 @@ def install(data):
 
 
 def uninstall(name, *args):
-    if no_db():
-        return
+    gi_db = get_db()
     App = gi_db.model("application")
     apps = App.filter(f"name='{name}'")
-    if len(apps) > 0:
-        App.delete(f"id={apps[0].id}")
-        print(
-            f"{c.success}'{name}' has been successfuly "
-            f"removed from your system{c.end}")
-    else:
+    if len(apps) < 1:
         print(f"'{name}' is not a geninstaller application")
+        return
+    app = App.get_id(apps[0].id)
+
+    os.system(f"rm {app.applications}")
+    os.system(f"rm -rf {app.applications_files}")
+    App.delete(f"id={app.id}")
+    print(
+        f"{c.success}'{name}' has been successfuly "
+        f"removed from your system{c.end}")

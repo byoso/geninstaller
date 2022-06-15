@@ -4,11 +4,16 @@
 """
 This fast installer is destined to the developpers who want to create
 their own quick installer, in the 'geninstaller' way.
-Just complete the informations asked below, the magic will do the rest.
+Just read the comments and complete the informations asked below,
+the magic will do the rest.
 """
 
 import os
 import pkg_resources
+
+# If your application have pip dependencies, you can add it here
+# they will be installed automatically , but do not remove
+# the ones included
 dependencies = [
     'flamewok>=1.0.7',  # to replace with geninstaller instead
 ]
@@ -21,6 +26,7 @@ except pkg_resources.DistributionNotFound:
 from flamewok.cli import cli
 from flamewok.helpers import clear
 from geninstaller import core
+from geninstaller.helpers import autoinstall
 
 
 # PLACE THIS FILE IN THE ROOT DIRECTORY OF YOUR PROJECT
@@ -77,7 +83,7 @@ datas = {
 def install():
     """installs geninstaller's database on the system,
      if not already installed. Absolutely required !"""
-    core.autoinstall()
+    autoinstall()
     # and then installs your application
     core.install(datas)
 

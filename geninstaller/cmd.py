@@ -66,12 +66,12 @@ def cmd():
         ("-h", cli.help, "display this help"),
         ("--help", cli.help, "idem"),
         "ACTIONS",
+        ('list', list, "list the applications installed with geninstaller"),
+        ('search <name>', search,
+            "search an application with an approximate name"),
         ('uninstall <name>', core.uninstall, (
             "uninstall an application with its exact name, "
             "use '' if the 'app name' contains a blank space")),
-        ('list', list, "list the installed applications"),
-        ('search <name>', search,
-            "search an application with an approximate name"),
         "OPEN DIRECTORIES",
         ('open', open_apps_dir,
             "open the applications installation directory"),
