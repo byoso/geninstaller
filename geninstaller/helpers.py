@@ -85,7 +85,6 @@ def clean_name(name):
 def create_desktop(datas):
     """Create the .desktop file and copy it to ~/.local/share/applications"""
     file_name = datas['applications']
-    # base_dir = datas['base_dir']
     destination_dir = datas['applications_files']
     name = datas['name']
     exec = os.path.join(destination_dir, datas['exec'])
@@ -93,7 +92,7 @@ def create_desktop(datas):
     comment = datas['comment']
     terminal = datas['terminal']
     categories = datas['categories']
-    desktop_categories = categories.replace(";", "/")
+    desktop_categories = categories.replace("/", ";")
     content = (
         "[Desktop Entry]\n"
         f"Name={name}\n"

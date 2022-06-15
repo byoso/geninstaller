@@ -7,6 +7,7 @@ from silly_db.db import DB
 
 from geninstaller import __version__
 from geninstaller import core
+from geninstaller import ploppers
 from geninstaller.helpers import (
     BASE_DIR,
     GI_DIR,
@@ -77,6 +78,10 @@ def cmd():
             "open the applications installation directory"),
         ('open database', open_geninstaller_dir,
             "open the geninstaller's database directory"),
+        "FOR DEVELOPPERS",
+        ('plop installer', ploppers.plop_installer,
+            "provides a ready-to-complete-and-use "
+            "'installer' template into your current working directory"),
     ]
     cli.route(*routes)
 
