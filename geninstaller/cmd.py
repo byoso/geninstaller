@@ -61,8 +61,6 @@ def search(name, *args):
 
 def cmd():
     routes = [
-        "program: geninstaller",
-        f"version: {__version__}",
         "HELP",
         ("-h", cli.help, "display this help"),
         ("--help", cli.help, "idem"),
@@ -83,6 +81,11 @@ def cmd():
         ('plop installer', ploppers.plop_installer,
             "provides a ready-to-complete-and-use "
             "'installer' template into your current working directory"),
+        "_"*78,
+        "ABOUT",
+        "program: geninstaller",
+        f"version: {__version__}",
+        "home page : https://github.com/byoso/geninstaller",
 
     ]
     cli.route(*routes)
