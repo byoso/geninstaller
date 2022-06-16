@@ -57,18 +57,20 @@ def get_db():
 
 def display_list(apps):
     """apps are a silly-db Selection"""
+    print("="*80)
+    print(f"{'Geninstaller: Installed Applications':^80}")
+    print("="*80 + "|")
     if len(apps) == 0:
-        print("No geninstaller application found")
+        print("\nNo geninstaller application installed")
         return
-    print("="*119)
-    print(f"{'Application':<45}|{'terminal ? ':^12}|{'Categories':<60}|")
-    print("="*119 + "|")
     for app in apps:
         print(
-            f"{app.name:<119}|\n"
-            f"{app.comment:<45}|"
-            f"{app.terminal:^12}|{app.categories:<60}|")
-        print("_"*119 + "|")
+            f"NAME: '{app.name}'\n"
+            f"COMMENTS: {app.comment}\n"
+            f"TERMINAL ?: {app.terminal}\n"
+            f"CATEGORIES: {app.categories}"
+            )
+        print("_"*80 + "|")
 
 
 def clean_name(name):

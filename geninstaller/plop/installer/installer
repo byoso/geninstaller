@@ -23,17 +23,15 @@ import pkg_resources
 # they will be installed automatically, but do not remove
 # the ones already included
 dependencies = [
-    'geninstaller>=1.0.0',
+    'geninstaller>=1.0.2',
 ]
 clean_up = False
 try:
     pkg_resources.require(dependencies)
 except pkg_resources.DistributionNotFound:
     os.system('pip install --upgrade geninstaller')
-    clean_up = True
 
 from flamewok.cli import cli
-from flamewok.helpers import clear
 from geninstaller import core
 from geninstaller.helpers import autoinstall
 
@@ -50,10 +48,10 @@ NAME = "A good name"
 DESCRIPTION = "A short description"
 # The main executable file of the application
 # The path is relative to this directory (BASE_DIR defined below)
-EXECUTABLE = "fake/fake.py"
+EXECUTABLE = "fake.py"
 # The icon that your system will use (optionnal, but so much better)
 # The path is relative to this directory (BASE_DIR defined below)
-ICON = "fake/icon.png"
+ICON = "icon.png"
 # Does your application needs to appear within a terminal ?
 # (usually, a graphical application doesn't need a terminal)
 TERMINAL = False
@@ -106,16 +104,7 @@ def install():
     core.install(datas)
 
 
-infos = (
-    "ABOUT GENINSTALLER\n"
-    "| This installer works with geninstaller. \n"
-    "| To know more about geninstaller and its options, type in console: \n"
-    "|      $ geninstaller -h"
-)
-
 if __name__ == "__main__":
-    if clean_up:
-        clear()
     this_file = os.path.basename(__file__)
     routes = [
         f"installer program for: {NAME}",
@@ -127,7 +116,6 @@ if __name__ == "__main__":
         "HELP",
         ("-h", cli.help, "\n|    display this help"),
         ("--help", cli.help, "\n|    display this help"),
-        infos,
     ]
 
     cli.route(*routes)

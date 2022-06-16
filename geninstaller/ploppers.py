@@ -16,4 +16,4 @@ def plop_installer():
     cwd = os.getcwd()
     shutil.copy(file, cwd)
     set_executable(os.path.join(cwd, 'installer'))
-    print(f"installer ploped in {cwd}")
+    print(f"installer plopped in {cwd}")
