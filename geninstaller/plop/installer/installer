@@ -23,13 +23,13 @@ import pkg_resources
 # they will be installed automatically, but do not remove
 # the ones already included
 dependencies = [
-    'geninstaller>=1.0.3',
+    'geninstaller>=1.0.4',
 ]
 clean_up = False
 try:
     pkg_resources.require(dependencies)
 except pkg_resources.DistributionNotFound:
-    os.system('pip install --upgrade geninstaller')
+    os.system('python3 -m pip install --upgrade geninstaller')
 
 from flamewok.cli import cli
 from geninstaller import core
