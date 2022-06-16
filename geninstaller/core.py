@@ -80,6 +80,13 @@ def install(data):
 
 
 def uninstall(name, *args):
+    if len(args) > 0:
+        print(
+            f"{c.warning}To many arguments given{c.end}\n"
+            "If the name of your app contains multiple words, \n"
+            "write it with quotes: 'your app name'"
+            )
+        return
     gi_db = get_db()
     App = gi_db.model("application")
     apps = App.filter(f"name='{name}'")

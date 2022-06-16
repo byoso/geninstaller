@@ -66,6 +66,7 @@ def cmd():
         "HELP",
         ("-h", cli.help, "display this help"),
         ("--help", cli.help, "idem"),
+        ("", cli.help, "idem"),
         "ACTIONS",
         ('list', list, "list the applications installed with geninstaller"),
         ('search <name>', search,
@@ -82,6 +83,7 @@ def cmd():
         ('plop installer', ploppers.plop_installer,
             "provides a ready-to-complete-and-use "
             "'installer' template into your current working directory"),
+
     ]
     cli.route(*routes)
 

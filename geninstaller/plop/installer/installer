@@ -19,11 +19,6 @@ independent.
 import os
 import pkg_resources
 
-from flamewok.cli import cli
-from flamewok.helpers import clear
-from geninstaller import core
-from geninstaller.helpers import autoinstall
-
 # If your application have pip dependencies, you can add them here
 # they will be installed automatically, but do not remove
 # the ones already included
@@ -36,6 +31,12 @@ try:
 except pkg_resources.DistributionNotFound:
     os.system('pip install --upgrade geninstaller')
     clean_up = True
+
+from flamewok.cli import cli
+from flamewok.helpers import clear
+from geninstaller import core
+from geninstaller.helpers import autoinstall
+
 
 
 # PLACE THIS FILE IN THE ROOT DIRECTORY OF YOUR PROJECT

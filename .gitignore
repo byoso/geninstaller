@@ -2,3 +2,9 @@ __pycache__/
 .env/
 *.pyc
 fake/
+installer_dev
+
+build/
+dist/
+.eggs/
+geninstaller.egg-info/
