@@ -9,6 +9,7 @@ import shutil
 from distutils.dir_util import copy_tree
 
 from silly_db.db import DB
+from flamewok import color as c
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,6 +21,24 @@ APP_DIR = os.path.expanduser(
     "~/.local/share/applications/")
 DB_FILE = os.path.expanduser(
     "~/.local/share/applications-files/.geninstaller/gi_db.sqlite3")
+
+
+def valid_for_installation(datas):
+    """Check the datas before copying anything"""
+    base_dir = datas['base_dir']
+    exec = os.path.join(base_dir, datas['exec'])
+    icon = os.path.join(base_dir, datas['icon'])
+    if not os.path.exists(exec):
+        print(f"{c.warning}Installation aborted: Wrong path to exec{c.end}")
+        return False
+    if datas['icon'] != '' and not os.path.exists(icon):
+        print(f"{c.warning}Installation aborted: Wrong path to icon{c.end}")
+        return False
+    if datas['terminal'] not in ['false', 'true']:
+        print(
+            f"{c.warning}Installation aborted: invalid terminal value{c.end}")
+        return False
+    return True
 
 
 def autoinstall():

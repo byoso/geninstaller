@@ -23,7 +23,7 @@ import pkg_resources
 # they will be installed automatically, but do not remove
 # the ones already included
 dependencies = [
-    'geninstaller>=1.0.4',
+    'geninstaller>=1.0.5',
 ]
 clean_up = False
 try:

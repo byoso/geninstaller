@@ -5,20 +5,17 @@
 applications"""
 
 import os
-import shutil
 
 from flamewok import color as c
 
 from geninstaller.helpers import (
-    BASE_DIR,
-    GI_DIR,
     APP_FILES_DIR,
     APP_DIR,
-    DB_FILE,
     get_db,
     clean_name,
     create_desktop,
     create_dir,
+    valid_for_installation,
 )
 
 
@@ -68,6 +65,8 @@ def install(data):
         **db_datas
     }
     # finallization:
+    if not valid_for_installation(cleaned_datas):
+        return
     App.insert(**db_datas)
     create_dir(cleaned_datas)
     create_desktop(cleaned_datas)
