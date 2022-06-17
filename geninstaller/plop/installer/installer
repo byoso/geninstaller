@@ -17,7 +17,6 @@ independent.
 """
 
 import os
-import sys
 import stat
 
 
