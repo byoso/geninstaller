@@ -17,24 +17,8 @@ independent.
 """
 
 import os
-import pkg_resources
-
-# If your application have pip dependencies, you can add them here
-# they will be installed automatically, but do not remove
-# the ones already included
-dependencies = [
-    'geninstaller>=1.0.5',
-]
-clean_up = False
-try:
-    pkg_resources.require(dependencies)
-except pkg_resources.DistributionNotFound:
-    os.system('python3 -m pip install --upgrade geninstaller')
-
-from flamewok.cli import cli
-from geninstaller import core
-from geninstaller.helpers import autoinstall
-
+import sys
+import stat
 
 
 # PLACE THIS FILE IN THE ROOT DIRECTORY OF YOUR PROJECT
@@ -99,13 +83,72 @@ datas = {
 def install():
     """installs geninstaller's database on the system,
      if not already installed. Absolutely required !"""
+    from geninstaller.helpers import autoinstall
+    from geninstaller import core
     autoinstall()
     # and then installs your application
     core.install(datas)
 
 
-if __name__ == "__main__":
+def check_pip():
+    """Checks if pip is installed"""
+    res = os.popen("python3 -m pip -V").read().strip()
+    if res.startswith('pip'):
+        return True
+    else:
+        return False
+
+
+def set_executable(file) -> None:
+    """set a file executable"""
+    st = os.stat(file)
+    os.chmod(file, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+
+def main():
+
     this_file = os.path.basename(__file__)
+    # if check_pip():  # debug, replace with 'if not'
+    if not check_pip():
+        res = input(
+            "pip is not installed for your main version of python3.\n"
+            f"pip is a dependencie required for using '{this_file}',"
+            " do you want to download and install it ?(y/n)")
+        if res.lower() not in ('y', 'yes'):
+            return
+        else:
+            py_version = sys.version_info[:2]
+            file = "get-pip.py"
+            if py_version[1] >= 7:
+                os.system(f"curl -O https://bootstrap.pypa.io/{file}")
+            else:
+                os.system(
+                    "curl -O https://bootstrap.pypa.io/pip/"
+                    f"{py_version[0]}.{py_version[1]}/{file}")
+            set_executable(file)
+            print(
+                "="*80,
+                f"\nfile '{file}' downladed to your current "
+                "working directory,\n"
+                "- Use this command to install pip:\n\n"
+                f"python3 {file}\n"
+                "\n- When it's done, do:\n"
+                f"./{this_file}"
+                )
+        return
+    import pkg_resources
+
+    dependencies = [
+        'geninstaller>=1.0.6',
+    ]
+
+    try:
+        pkg_resources.require(dependencies)
+    except pkg_resources.DistributionNotFound:
+        os.system('python3 -m pip install --upgrade geninstaller')
+
+    from flamewok.cli import cli
+
     routes = [
         f"installer program for: {NAME}",
         "INSTALLATION",
@@ -119,3 +162,7 @@ if __name__ == "__main__":
     ]
 
     cli.route(*routes)
+
+
+if __name__ == "__main__":
+    main()
