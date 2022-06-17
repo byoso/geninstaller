@@ -108,38 +108,25 @@ def set_executable(file) -> None:
 def main():
 
     this_file = os.path.basename(__file__)
-    # if check_pip():  # debug, replace with 'if not'
     if not check_pip():
-        res = input(
+        print(
             "pip is not installed for your main version of python3.\n"
-            f"pip is a dependencie required for using '{this_file}',"
-            " do you want to download and install it ?(y/n)")
-        if res.lower() not in ('y', 'yes'):
-            return
-        else:
-            py_version = sys.version_info[:2]
-            file = "get-pip.py"
-            if py_version[1] >= 7:
-                os.system(f"curl -O https://bootstrap.pypa.io/{file}")
-            else:
-                os.system(
-                    "curl -O https://bootstrap.pypa.io/pip/"
-                    f"{py_version[0]}.{py_version[1]}/{file}")
-            set_executable(file)
-            print(
-                "="*80,
-                f"\nfile '{file}' downladed to your current "
-                "working directory,\n"
-                "- Use this command to install pip:\n\n"
-                f"python3 {file}\n"
-                "\n- When it's done, do:\n"
-                f"./{this_file}"
-                )
+            "Please install pip first, and then, restart your session "
+            "before executing './{this_file}' again.\n\n"
+            "- DEBIAN (Ubuntu, Linux Mint, etc...):\n"
+            "apt install python3-pip\n"
+            "- ARCH LINUX:\n"
+            "sudo pacman -S python-pip\n"
+            "- OPENSUSE:\n"
+            "zypper install python3-pip\n"
+            "\n"
+            )
         return
+
     import pkg_resources
 
     dependencies = [
-        'geninstaller>=1.0.6',
+        'geninstaller>=1.0.7',
     ]
 
     try:
