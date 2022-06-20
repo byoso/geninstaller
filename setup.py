@@ -33,7 +33,7 @@ setup(
         ),
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/byoso/silly_db",
+    url="https://github.com/byoso/geninstaller",
     author="Vincent Fabre",
     author_email="peigne.plume@gmail.com",
     license="MIT",

@@ -63,7 +63,7 @@ check_pip()
 import pkg_resources
 
 dependencies = [
-    'geninstaller>=1.0.8',
+    'geninstaller>=1.0.9',
 ]
 try:
     pkg_resources.require(dependencies)
