@@ -17,8 +17,71 @@ independent.
 """
 
 import os
+import sys
 import stat
 
+# ============ DO NOT TOUCH THIS DEPENDENCIES CHECK ============
+
+# dependencies check
+version = sys.version_info  # user's python version
+this_file = os.path.basename(__file__)
+
+
+def check_pip(test=False):
+    """Checks if pip is installed, if it is not,
+    closes the program with a message"""
+    res = os.popen(f"python{version[0]}.{version[1]} -m pip -V").read().strip()
+    OK = False
+    if res.startswith('pip'):
+        OK = True
+    if not OK or test:
+        this_file = os.path.basename(__file__)
+        print(
+            "\x1b[0;30;33m"  # text is yellow
+            "pip is not installed for your main version of python3.\n"
+            "\x1b[0m"
+            "Please install pip first (see below)"
+            ", and then, restart your session "
+            f"before executing './{this_file}' again.\n\n"
+            "   INSTALLING pip:\n"
+            "- DEBIAN (Ubuntu, Linux Mint, etc...):\n"
+            "sudo apt install python3-pip\n"
+            "- Fedora, CentOS/RHEL 7+:\n"
+            "sudo yum install python3-pip\n"
+            "- ARCH LINUX, Manjaro:\n"
+            "sudo pacman -S python-pip\n"
+            "- OPENSUSE:\n"
+            "sudo zypper install python3-pip\n"
+            "\n"
+            "Or, for any distribution:\n"
+            "wget https://bootstrap.pypa.io/get-pip.py\n"
+            "chmod +x get-pip.py\n"
+            "sudo python3 get-pip.py\n"
+            )
+        exit()
+check_pip()
+import pkg_resources
+
+dependencies = [
+    'geninstaller>=1.0.8',
+]
+try:
+    pkg_resources.require(dependencies)
+except pkg_resources.DistributionNotFound:
+    os.system(
+        f"python{version[0]}.{version[1]} "
+        "-m pip install --upgrade geninstaller")
+    print(
+        "\x1b[0;30;32m"  # text is green
+        "Dependencies successfully installed, "
+        f"please, execute '{this_file}' again"
+        "\x1b[0m"
+        )
+    exit()
+
+from flamewok.cli import cli
+
+# =========== THERE WE GO ===================================
 
 # PLACE THIS FILE IN THE ROOT DIRECTORY OF YOUR PROJECT
 
@@ -89,51 +152,7 @@ def install():
     core.install(datas)
 
 
-def check_pip():
-    """Checks if pip is installed"""
-    res = os.popen("python3 -m pip -V").read().strip()
-    if res.startswith('pip'):
-        return True
-    else:
-        return False
-
-
-def set_executable(file) -> None:
-    """set a file executable"""
-    st = os.stat(file)
-    os.chmod(file, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
-
 def main():
-
-    this_file = os.path.basename(__file__)
-    if not check_pip():
-        print(
-            "pip is not installed for your main version of python3.\n"
-            "Please install pip first, and then, restart your session "
-            "before executing './{this_file}' again.\n\n"
-            "- DEBIAN (Ubuntu, Linux Mint, etc...):\n"
-            "apt install python3-pip\n"
-            "- ARCH LINUX:\n"
-            "sudo pacman -S python-pip\n"
-            "- OPENSUSE:\n"
-            "zypper install python3-pip\n"
-            "\n"
-            )
-        return
-
-    import pkg_resources
-
-    dependencies = [
-        'geninstaller>=1.0.7',
-    ]
-
-    try:
-        pkg_resources.require(dependencies)
-    except pkg_resources.DistributionNotFound:
-        os.system('python3 -m pip install --upgrade geninstaller')
-
-    from flamewok.cli import cli
 
     routes = [
         f"installer program for: {NAME}",
@@ -146,7 +165,6 @@ def main():
         ("-h", cli.help, "\n|    display this help"),
         ("--help", cli.help, "\n|    display this help"),
     ]
-
     cli.route(*routes)
 
 
