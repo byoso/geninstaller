@@ -3,20 +3,18 @@
 import os
 
 from flamewok.cli import cli
+from flamewok import color as c
 from silly_db.db import DB
 
 from geninstaller import __version__
 from geninstaller import core
 from geninstaller import ploppers
 from geninstaller.helpers import (
-    BASE_DIR,
     GI_DIR,
     APP_FILES_DIR,
-    APP_DIR,
     DB_FILE,
     no_db,
     display_list,
-    clean_name,
 )
 
 
@@ -46,14 +44,15 @@ def open_apps_dir(*args):
     os.system(f"xdg-open {APP_FILES_DIR}")
 
 
-def search(name, *args):
+def search(name=None, *args):
     name = name
+    if name is None:
+        return list()
     if no_db():
         return
     db = DB(
         file=DB_FILE,
         base=GI_DIR,
-        # migrations_dir="None",  # delete with silly-db v 1.1.3
     )
     apps = db.select(f"* FROM application WHERE name LIKE '%{name}%'")
     display_list(apps)

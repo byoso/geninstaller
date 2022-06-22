@@ -18,7 +18,6 @@ independent.
 
 import os
 import sys
-import stat
 
 # ============ DO NOT TOUCH THIS DEPENDENCIES CHECK ============
 
@@ -63,7 +62,7 @@ check_pip()
 import pkg_resources
 
 dependencies = [
-    'geninstaller>=1.0.8',
+    'geninstaller>=1.0.9',
 ]
 try:
     pkg_resources.require(dependencies)
@@ -89,15 +88,15 @@ from flamewok.cli import cli
 # ======= Complete this informations ==================================
 
 # choose a good name, do NOT use underscores here
-NAME = "A good name"
+NAME = "fake"
 # short description (optionnal), a few words would be fine
 DESCRIPTION = "A short description"
 # The main executable file of the application
 # The path is relative to this directory (BASE_DIR defined below)
-EXECUTABLE = "fake.py"
+EXECUTABLE = "fake/fake.py"
 # The icon that your system will use (optionnal, but so much better)
 # The path is relative to this directory (BASE_DIR defined below)
-ICON = "icon.png"
+ICON = "fake/icon.png"
 # Does your application needs to appear within a terminal ?
 # (usually, a graphical application doesn't need a terminal)
 TERMINAL = False

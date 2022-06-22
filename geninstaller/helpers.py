@@ -23,22 +23,15 @@ DB_FILE = os.path.expanduser(
     "~/.local/share/applications-files/.geninstaller/gi_db.sqlite3")
 
 
-def valid_for_installation(datas):
-    """Check the datas before copying anything"""
-    base_dir = datas['base_dir']
-    exec = os.path.join(base_dir, datas['exec'])
-    icon = os.path.join(base_dir, datas['icon'])
-    if not os.path.exists(exec):
-        print(f"{c.warning}Installation aborted: Wrong path to exec{c.end}")
-        return False
-    if datas['icon'] != '' and not os.path.exists(icon):
-        print(f"{c.warning}Installation aborted: Wrong path to icon{c.end}")
-        return False
-    if datas['terminal'] not in ['false', 'true']:
-        print(
-            f"{c.warning}Installation aborted: invalid terminal value{c.end}")
-        return False
-    return True
+def abort(content):
+    message = f"{c.warning}Aborted: {content}{c.end}"
+    print(message)
+    exit()
+
+
+def no_forbidden(el):
+    if ";" in el:
+        abort(f"forbidden use of ';' in: '{el}'")
 
 
 def autoinstall():
@@ -80,7 +73,7 @@ def display_list(apps):
     print(f"{'Geninstaller: Installed Applications':^80}")
     print("="*80 + "|")
     if len(apps) == 0:
-        print("\nNo geninstaller application installed")
+        print("\nNo geninstaller application found")
         return
     for app in apps:
         print(
@@ -92,15 +85,53 @@ def display_list(apps):
         print("_"*80 + "|")
 
 
-def clean_name(name):
+def clean_dir_name(name):
+    """Cleans up the name for the directory"""
     cleaner = name.strip()
-    dir_name = ""
+    cleaned_name = ""
     for letter in cleaner:
-        if letter in list(" ;,/"):
-            dir_name += "_"
+        if letter in list(" ;,/\\"):
+            cleaned_name += "_"
         else:
-            dir_name += letter
-    return dir_name
+            cleaned_name += letter
+    return cleaned_name
+
+
+def valid_for_installation(data):
+    """Check the datas before copying anything"""
+    for el in data.values():
+        if type(el) == str:
+            no_forbidden(el)
+    gi_db = get_db()
+    App = gi_db.model("application")
+    app = App.filter(f"name='{data['name']}'")
+    if ("_" in data['name'] or "/" in data['name']
+            or data['name'].startswith(".")):
+        abort(
+            "An app name must NOT contain '_' and '/', "
+            "and must not begin with a '.'")
+    if data['name'].lower().strip() in ["geninstaller", "geninstaller-gui"]:
+        abort(f"'{data['name']}' is a reserved name")
+
+    if type(data['terminal']) != bool:
+        abort("The 'TERMINAL' value must be a boolean")
+
+    for category in data['categories']:
+        no_forbidden(category)
+    if len(app) > 0:
+        abort(
+            f"An application called '{data['name']}'"
+            " is already installed, change the current application's"
+            f" name, or uninstall the other application first."
+            )
+    # check relative paths
+    base_dir = data['base_dir']
+    exec = os.path.join(base_dir, data['exec'])
+    icon = os.path.join(base_dir, data['icon'])
+    if not os.path.exists(exec):
+        abort("Wrong path to exec")
+    if data['icon'] != '' and not os.path.exists(icon):
+        abort("Wrong path to icon")
 
 
 def create_desktop(datas):

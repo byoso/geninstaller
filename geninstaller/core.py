@@ -12,7 +12,7 @@ from geninstaller.helpers import (
     APP_FILES_DIR,
     APP_DIR,
     get_db,
-    clean_name,
+    clean_dir_name,
     create_desktop,
     create_dir,
     valid_for_installation,
@@ -22,35 +22,23 @@ from geninstaller.helpers import (
 def install(data):
     """Prepares the data before finalization"""
     # first, some data check
-    gi_db = get_db()
-    App = gi_db.model("application")
-    app = App.filter(f"name='{data['name']}'")
-    if len(app) > 0:
-        print(
-            f"{c.warning}An application called '{data['name']}'"
-            " is already installed, change the current application's"
-            f" name, or uninstall the other application first{c.end}."
-            )
-        return
-    if "_" in data['name']:
-        print(f"{c.warning}Undersocres are not allowed for an app name{c.end}")
-        return
-    if type(data['terminal']) != bool:
-        print(f"{c.warning}The 'TERMINAL' value must be a boolean{c.end}")
-        return
+    valid_for_installation(data)
 
+    # transforming datas
     categories = ""
     for category in data['categories']:
         categories += category + "/"
-    applications_files = APP_FILES_DIR + clean_name(data['name'])
-    applications = APP_DIR + clean_name(data['name']) + ".desktop"
+    # directory name:
+    applications_files = APP_FILES_DIR + clean_dir_name(data['name'])
+    # desktop file name:
+    applications = APP_DIR + clean_dir_name(data['name']) + ".desktop"
     if data['terminal']:
         terminal = "true"
     else:
         terminal = "false"
 
     db_datas = {
-        'name': data['name'],
+        'name': data['name'].strip(),
         'exec': data['exec'],
         'comment': data['comment'],
         'terminal': terminal,
@@ -60,16 +48,16 @@ def install(data):
         'applications': applications,
 
     }
-    cleaned_datas = {
+    all_datas = {
         'base_dir': data['base_dir'],
         **db_datas
     }
     # finallization:
-    if not valid_for_installation(cleaned_datas):
-        return
+    gi_db = get_db()
+    App = gi_db.model("application")
     App.insert(**db_datas)
-    create_dir(cleaned_datas)
-    create_desktop(cleaned_datas)
+    create_dir(all_datas)
+    create_desktop(all_datas)
 
     print(
         f"{c.success}geninstaller has successfuly installed "
