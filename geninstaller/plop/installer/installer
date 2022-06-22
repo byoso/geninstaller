@@ -61,22 +61,28 @@ def check_pip(test=False):
 check_pip()
 import pkg_resources
 
-dependencies = [
-    'geninstaller>=1.1.0',
-]
-try:
-    pkg_resources.require(dependencies)
-except pkg_resources.DistributionNotFound:
+
+def pip_install_dependencies():
     os.system(
         f"python{version[0]}.{version[1]} "
         "-m pip install --upgrade geninstaller")
     print(
         "\x1b[0;30;32m"  # text is green
-        "Dependencies successfully installed, "
-        f"please, execute '{this_file}' again"
+        "Dependencies successfully installed."
         "\x1b[0m"
         )
-    exit()
+
+
+dependencies = [
+    'geninstaller>=1.1.1',
+]
+try:
+    pkg_resources.require(dependencies)
+except pkg_resources.VersionConflict:  # python3.7/3.8
+    pip_install_dependencies()
+except pkg_resources.DistributionNotFound:  # python3.6/3.9
+    pip_install_dependencies()
+
 
 from flamewok.cli import cli
 
@@ -88,15 +94,15 @@ from flamewok.cli import cli
 # ======= Complete this informations ==================================
 
 # choose a good name, do NOT use underscores here
-NAME = "Fake"
+NAME = "fake"
 # short description (optionnal), a few words would be fine
 DESCRIPTION = "A short description"
 # The main executable file of the application
 # The path is relative to this directory (BASE_DIR defined below)
-EXECUTABLE = "fake.py"
+EXECUTABLE = "fake/fake.py"
 # The icon that your system will use (optionnal, but so much better)
 # The path is relative to this directory (BASE_DIR defined below)
-ICON = "icon.png"
+ICON = "fake/icon.png"
 # Does your application needs to appear within a terminal ?
 # (usually, a graphical application doesn't need a terminal)
 TERMINAL = False
