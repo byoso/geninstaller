@@ -144,7 +144,7 @@ def create_desktop(datas):
     comment = datas['comment']
     terminal = datas['terminal']
     categories = datas['categories']
-    desktop_categories = categories.replace("/", ";")
+    desktop_categories = categories
     content = (
         "[Desktop Entry]\n"
         f"Name={name}\n"

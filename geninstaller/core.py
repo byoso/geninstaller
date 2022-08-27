@@ -27,7 +27,7 @@ def install(data):
     # transforming datas
     categories = ""
     for category in data['categories']:
-        categories += category + "/"
+        categories += category + ";"
     # directory name:
     applications_files = APP_FILES_DIR + clean_dir_name(data['name'])
     # desktop file name:
