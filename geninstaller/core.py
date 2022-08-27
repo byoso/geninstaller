@@ -64,6 +64,7 @@ def install(data):
         f"'{data['name']}' on your system{c.end}")
     print("please read the geninstaller's help to know how to use it:")
     print("$ geninstaller -h")
+    os.system(f"notify-send \"'{data['name']}' successfully installed\"")
 
 
 def uninstall(name, *args):
@@ -88,3 +89,4 @@ def uninstall(name, *args):
     print(
         f"{c.success}'{name}' has been successfuly "
         f"removed from your system{c.end}")
+    os.system(f"notify-send \"'{name}' has been removed from your system.\"")
