@@ -50,6 +50,8 @@ def install(data):
     }
     all_datas = {
         'base_dir': data['base_dir'],
+        'exec_options': data['exec_options'],
+        'options': data['options'],
         **db_datas
     }
     # finallization:

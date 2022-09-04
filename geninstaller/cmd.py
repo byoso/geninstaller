@@ -61,9 +61,7 @@ def search(name=None, *args):
 def cmd():
     routes = [
         "HELP",
-        ("-h", cli.help, "display this help"),
-        ("--help", cli.help, "idem"),
-        ("", cli.help, "idem"),
+        (["", "-h", "--help"], cli.help, "display this help"),
         "ACTIONS",
         ('list', list, "list the applications installed with geninstaller"),
         ('search <name>', search,

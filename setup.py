@@ -54,7 +54,7 @@ setup(
     package_data={'': ['*.sqlite3', 'installer']},
     python_requires='>=3.6',
     install_requires=[
-        "silly-db >= 1.1.5",
+        "silly-db >= 1.1.9",
     ],
     keywords='install installer linux',
     entry_points={

@@ -140,11 +140,12 @@ def create_desktop(datas):
     destination_dir = datas['applications_files']
     name = datas['name']
     exec = os.path.join(destination_dir, datas['exec'])
+    if datas['exec_options'] != "":
+        exec += " " + datas['exec_options']
     icon = os.path.join(destination_dir, datas['icon'])
     comment = datas['comment']
     terminal = datas['terminal']
     categories = datas['categories']
-    desktop_categories = categories
     content = (
         "[Desktop Entry]\n"
         f"Name={name}\n"
@@ -153,8 +154,12 @@ def create_desktop(datas):
         f"Exec={exec}\n"
         f"Terminal={terminal}\n"
         f"Type=Application\n"
-        f"Categories={desktop_categories}\n"
         )
+    print(categories)
+    if categories != "":
+        content += f"Categories={categories}\n"
+    for option in datas['options']:
+        content += f"{option}\n"
     with open(file_name, "w") as file:
         file.write(content)
     set_executable(file_name)
