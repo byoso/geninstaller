@@ -136,6 +136,16 @@ def valid_for_installation(data):
 
 def create_desktop(datas):
     """Create the .desktop file and copy it to ~/.local/share/applications"""
+    # compatibilité with old installer version < 1.1.3:
+    try:
+        datas['exec_options']
+    except KeyError:
+        datas['exec_options'] = ""
+    try:
+        datas['options']
+    except KeyError:
+        datas['options'] = []
+
     file_name = datas['applications']
     destination_dir = datas['applications_files']
     name = datas['name']
