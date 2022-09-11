@@ -3,7 +3,6 @@
 import os
 
 from flamewok.cli import cli
-from flamewok import color as c
 from silly_db.db import DB
 
 from geninstaller import __version__
@@ -15,6 +14,7 @@ from geninstaller.helpers import (
     DB_FILE,
     no_db,
     display_list,
+    get_db,
 )
 
 
@@ -24,10 +24,9 @@ def list(*args):
     db = DB(
         file=DB_FILE,
         base=GI_DIR,
-        # migrations_dir="None",  # delete with silly-db v 1.1.4
     )
     App = db.model("application")
-    apps = App.all()
+    apps = App.sil.all()
     display_list(apps)
 
 
@@ -89,4 +88,6 @@ def cmd():
 
 
 if __name__ == "__main__":
+    db = get_db()
+    db.migrate_all()
     cmd()

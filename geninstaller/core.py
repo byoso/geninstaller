@@ -57,7 +57,7 @@ def install(data):
     # finallization:
     gi_db = get_db()
     App = gi_db.model("application")
-    App.insert(**db_datas)
+    App.sil.insert(**db_datas)
     create_dir(all_datas)
     create_desktop(all_datas)
 
@@ -79,15 +79,15 @@ def uninstall(name, *args):
         return
     gi_db = get_db()
     App = gi_db.model("application")
-    apps = App.filter(f"name='{name}'")
+    apps = App.sil.filter(f"name='{name}'")
     if len(apps) < 1:
         print(f"'{name}' is not a geninstaller application")
         return
-    app = App.get_id(apps[0].id)
+    app = App.sil.get_id(apps[0].id)
 
     os.system(f"rm {app.applications}")
     os.system(f"rm -rf {app.applications_files}")
-    App.delete(f"id={app.id}")
+    App.sil.delete(f"id={app.id}")
     print(
         f"{c.success}'{name}' has been successfuly "
         f"removed from your system{c.end}")

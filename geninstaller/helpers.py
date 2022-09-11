@@ -11,6 +11,8 @@ from distutils.dir_util import copy_tree
 from silly_db.db import DB
 from flamewok import color as c
 
+from geninstaller.exceptions import GeninstallerError
+
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 GI_DIR = os.path.expanduser(
@@ -21,6 +23,7 @@ APP_DIR = os.path.expanduser(
     "~/.local/share/applications/")
 DB_FILE = os.path.expanduser(
     "~/.local/share/applications-files/.geninstaller/gi_db.sqlite3")
+
 
 
 def abort(content):
@@ -39,6 +42,11 @@ def autoinstall():
     if not os.path.exists(DB_FILE):
         copy_tree(
             BASE_DIR+'/plop/database', GI_DIR)
+        db = DB(
+            base=GI_DIR,
+            file=DB_FILE,
+            migrations_dir="migrations")
+        db.migrate_all()
         print("geninstaller database initialized")
 
 
@@ -63,6 +71,7 @@ def get_db():
     gi_db = DB(
             file=DB_FILE,
             base=GI_DIR,
+            migrations_dir="migrations"
         )
     return gi_db
 
@@ -104,7 +113,7 @@ def valid_for_installation(data):
             no_forbidden(el)
     gi_db = get_db()
     App = gi_db.model("application")
-    app = App.filter(f"name='{data['name']}'")
+    app = App.sil.filter(f"name='{data['name']}'")
     if ("_" in data['name'] or "/" in data['name']
             or data['name'].startswith(".")):
         abort(
@@ -180,7 +189,14 @@ def create_dir(datas):
     right place, and ensure that the exec file is set 'executable'"""
     base_dir = datas['base_dir']
     destination_dir = datas['applications_files']
-    shutil.copytree(
-        base_dir, destination_dir)
+    try:
+        shutil.copytree(
+            base_dir, destination_dir)
+    except FileExistsError:
+        print(
+            f"{c.warning}\nWarning: {destination_dir} "
+            f"already exists before installation{c.end}"
+            )
+
     exec = os.path.join(destination_dir, datas['exec'])
     set_executable(exec)

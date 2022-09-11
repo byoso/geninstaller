@@ -1,0 +1,2 @@
+class GeninstallerError(Exception):
+    pass
