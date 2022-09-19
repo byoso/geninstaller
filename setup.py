@@ -53,7 +53,7 @@ setup(
         "geninstaller.plop.installer",
         ],
     # include_package_data=True,
-    package_data={'': ['*.sqlite3', '*.sql', 'installer']},
+    package_data={'': ['*.sqlite3', '*.sql', 'installer', '*.png']},
     python_requires='>=3.6',
     install_requires=[
         "silly-db >= 2.0.1",

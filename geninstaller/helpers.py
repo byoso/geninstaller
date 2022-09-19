@@ -119,9 +119,6 @@ def valid_for_installation(data):
         abort(
             "An app name must NOT contain '_' and '/', "
             "and must not begin with a '.'")
-    if "bypass" not in data:
-        if data['name'].lower().strip() in ["geninstaller", "geninstaller-gui"]:
-            abort(f"'{data['name']}' is a reserved name")
 
     if type(data['terminal']) != bool:
         abort("The 'TERMINAL' value must be a boolean")

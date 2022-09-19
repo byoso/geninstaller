@@ -69,7 +69,7 @@ options = [
 
 # you can add your own PyPI dependencies here if you want:
 dependencies = [
-    'geninstaller>=1.2.1',  # do not remove this line.
+    'geninstaller>=1.2.2',  # do not remove this line.
 ]
 
 # you're done ! :)
