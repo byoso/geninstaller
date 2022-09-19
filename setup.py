@@ -47,6 +47,7 @@ setup(
     packages=[
         "geninstaller",
         "geninstaller.plop",
+        "geninstaller.plop.gui",
         "geninstaller.plop.database",
         "geninstaller.plop.database.migrations",
         "geninstaller.plop.installer",
@@ -55,7 +56,7 @@ setup(
     package_data={'': ['*.sqlite3', '*.sql', 'installer']},
     python_requires='>=3.6',
     install_requires=[
-        "silly-db >= 2.0.0",
+        "silly-db >= 2.0.1",
     ],
     keywords='install installer linux',
     entry_points={

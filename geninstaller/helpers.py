@@ -80,7 +80,7 @@ def display_list(apps):
     """apps are a silly-db Selection"""
     print("="*80)
     print(f"{'Geninstaller: Installed Applications':^80}")
-    print("="*80 + "|")
+    print("="*79 + "|")
     if len(apps) == 0:
         print("\nNo geninstaller application found")
         return
@@ -91,7 +91,7 @@ def display_list(apps):
             f"TERMINAL ?: {app.terminal}\n"
             f"CATEGORIES: {app.categories}"
             )
-        print("_"*80 + "|")
+        print("_"*79 + "|")
 
 
 def clean_dir_name(name):
@@ -119,8 +119,9 @@ def valid_for_installation(data):
         abort(
             "An app name must NOT contain '_' and '/', "
             "and must not begin with a '.'")
-    if data['name'].lower().strip() in ["geninstaller", "geninstaller-gui"]:
-        abort(f"'{data['name']}' is a reserved name")
+    if "bypass" not in data:
+        if data['name'].lower().strip() in ["geninstaller", "geninstaller-gui"]:
+            abort(f"'{data['name']}' is a reserved name")
 
     if type(data['terminal']) != bool:
         abort("The 'TERMINAL' value must be a boolean")

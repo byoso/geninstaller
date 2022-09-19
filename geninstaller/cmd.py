@@ -8,6 +8,7 @@ from silly_db.db import DB
 from geninstaller import __version__
 from geninstaller import core
 from geninstaller import ploppers
+from geninstaller.plop.gui.gui_installer import install_gui
 from geninstaller.helpers import (
     GI_DIR,
     APP_FILES_DIR,
@@ -68,6 +69,8 @@ def cmd():
         ('uninstall <name>', core.uninstall, (
             "uninstall an application with its exact name, "
             "use '' if the 'app name' contains a blank space")),
+        "GUI",
+        ('gui', install_gui, "Installs the graphical interface on your system"),
         "OPEN DIRECTORIES",
         ('open', open_apps_dir,
             "open the applications installation directory"),
