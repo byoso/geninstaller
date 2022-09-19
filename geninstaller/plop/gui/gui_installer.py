@@ -9,7 +9,7 @@ import os
 
 from geninstaller import core
 
-NAME = "Geninstaller-gui"
+NAME = "Geninstaller gui"
 DESCRIPTION = "Uninstall with only one click your geninstaller applications"
 EXECUTABLE = "geninstaller_gui.py"
 ICON = "geninstaller.png"
@@ -49,7 +49,6 @@ datas = {
     "base_dir": BASE_DIR,
     "exec_options": exec_options,
     "options": options,
-    "bypass": True,
 }
 
 def install_gui():

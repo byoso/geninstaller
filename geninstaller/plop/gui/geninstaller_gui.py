@@ -36,13 +36,13 @@ class AppBox(gtk.HBox):
         self.destroy()
 
 
-
 class MainWindow(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
-
-        self.set_default_icon_from_file(os.path.abspath(
-            os.path.join(BASE_DIR, "geninstaller.png")))
+        self.set_title("Geninstaller GUI")
+        icon_file = os.path.abspath(
+            os.path.join(BASE_DIR, "geninstaller.png"))
+        self.set_default_icon_from_file(icon_file)
         self.set_size_request(600, 600)
         self.set_resizable(False)
         self.scroll = gtk.ScrolledWindow()
