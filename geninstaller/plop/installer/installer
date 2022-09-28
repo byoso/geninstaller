@@ -65,6 +65,7 @@ exec_options = ""  # if the exec needs additional options
 # if more parameters are needed in the .desktop file, fill this list
 # with the lines you want. e.g: ["foo=bar", "truc=machin"]
 options = [
+    "Keywords=geninstaller;",
 ]
 
 # you can add your own PyPI dependencies here if you want:
