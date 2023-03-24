@@ -37,8 +37,8 @@ ICON = "fake/icon.png"
 # (usually, a graphical application doesn't need a terminal)
 TERMINAL = False
 
-# uncomment the categories in which you want your app to appear in (optionnal).
-# if needed, read this:
+# Just uncomment the categories in which you want your app to appear in (optionnal).
+# If you need to know more (expert), read this:
 # freedesktop.org doc for categories
 # https://specifications.freedesktop.org/menu-spec/latest/apa.html#main-category-registry
 # additionnal categories
@@ -70,7 +70,7 @@ options = [
 
 # you can add your own PyPI dependencies here if you want:
 dependencies = [
-    'geninstaller>=1.2.2',  # do not remove this line.
+    'geninstaller>=1.2.3',  # do not remove this line.
 ]
 
 # you're done ! :)

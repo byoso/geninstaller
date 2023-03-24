@@ -51,5 +51,6 @@ datas = {
     "options": options,
 }
 
+
 def install_gui():
     core.install(datas)

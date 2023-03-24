@@ -107,7 +107,21 @@ def clean_dir_name(name):
 
 
 def valid_for_installation(data):
-    """Check the datas before copying anything"""
+    """Check the datas before copying anything
+
+data = {
+    "name": NAME,
+    "exec": EXECUTABLE,
+    "comment": DESCRIPTION,
+    "terminal": TERMINAL,
+    "icon": ICON,
+    "categories": CATEGORIES,
+    "base_dir": BASE_DIR,
+    "exec_options": exec_options,
+    "options": options,
+}
+
+    """
     for el in data.values():
         if type(el) == str:
             no_forbidden(el)
