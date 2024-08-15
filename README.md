@@ -1,5 +1,7 @@
 # Geninstaller (for linux)
 
+# !!! Does not work anymore with linux mint 22, geninstaller v2 will solve the problem (WIP) !!!
+
 _Universal linux installer system_
 Installs applications in the user's space.
 
