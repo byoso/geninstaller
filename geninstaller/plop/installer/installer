@@ -70,7 +70,7 @@ options = [
 
 # you can add your own PyPI dependencies here if you want:
 dependencies = [
-    'geninstaller>=1.2.3',  # do not remove this line.
+    'geninstaller>=1.2.4,<2.0',  # do not remove this line.
 ]
 
 # you're done ! :)
@@ -133,7 +133,7 @@ def pip_install_dependencies():
         dependency = dependency.replace(">", "=").split('=')[0]
         os.system(
             f"python{version[0]}.{version[1]} "
-            f"-m pip install --upgrade {dependency}")
+            f"-m pip install --upgrade {dependency} --break-system-packages")
     print(
         "\x1b[0;30;32m"  # text is green
         "Dependencies successfully installed."

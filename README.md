@@ -1,6 +1,6 @@
 # Geninstaller (for linux)
 
-# !!! Does not work anymore with linux mint 22, geninstaller v2 will solve the problem (WIP) !!!
+## Ubuntu 24 and derivated: Now needs to add --break-system-packages on install.
 
 _Universal linux installer system_
 Installs applications in the user's space.
@@ -36,8 +36,9 @@ $ geninstaller --help
 
 #### Installation
 ```
-$ pip install geninstaller
+$ pip install geninstaller --break-system-packages
 ```
+Note that `--break-system-packages` allows to bypass the protection of Ubuntu 24, be sure you don't install nested dependencies that should be dangerous for your system. Geninstaller will install 2 additionnal PyPI libs: `silly-db` and `flamewok`, you may need to install them manually on Ubuntu 24+. A v2 is in progress and will get rid of this 2 dependencies.
 
 #### Get an 'installer' template
 ```
@@ -53,3 +54,7 @@ Behind this, the 'installer' script will take care of the requirements, and inst
 
 #### Limitation (and gain)
 Geninstaller only installs applications in the user's space (no sudo required), the gain is that it makes it compatible with any linux distibution. So, if your application needs to be installed 'system wide', geninstaller is not the tool that you need.
+
+# Change log
+
+- 1.2.4: "--break-system-packages" added in the provided installer to bypass ubuntu 24 limitation.
