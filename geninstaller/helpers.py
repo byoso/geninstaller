@@ -6,12 +6,11 @@ geninstaller"""
 import os
 import stat
 import shutil
-from distutils.dir_util import copy_tree
 
 from silly_db.db import DB
-from flamewok import color as c
 
 from geninstaller.exceptions import GeninstallerError
+from geninstaller.silly_engine import c
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -25,19 +24,29 @@ DB_FILE = os.path.expanduser(
     "~/.local/share/applications-files/.geninstaller/gi_db.sqlite3")
 
 
+def copy_tree(src, dst) -> None:
+    os.makedirs(dst, exist_ok=True)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copy_tree(s, d)
+        else:
+            shutil.copy2(s, d)
 
-def abort(content):
+
+def abort(content)  -> None:
     message = f"{c.warning}Aborted: {content}{c.end}"
     print(message)
     exit()
 
 
-def no_forbidden(el):
+def no_forbidden(el) -> None:
     if ";" in el:
         abort(f"forbidden use of ';' in: '{el}'")
 
 
-def autoinstall():
+def autoinstall() -> None:
     """install the empty database"""
     if not os.path.exists(DB_FILE):
         copy_tree(
@@ -56,7 +65,7 @@ def set_executable(file) -> None:
     os.chmod(file, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def no_db():
+def no_db() -> bool:
     """check if the database already exists or not"""
     if not os.path.exists(DB_FILE):
         print("geninstaller's database has not been initialized.")

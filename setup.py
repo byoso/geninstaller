@@ -51,6 +51,10 @@ setup(
         "geninstaller.plop.database",
         "geninstaller.plop.database.migrations",
         "geninstaller.plop.installer",
+        "geninstaller.silly_engine",
+        "geninstaller.silly_engine.jsondb",
+        "geninstaller.silly_engine.router",
+
         ],
     # include_package_data=True,
     package_data={'': ['*.sqlite3', '*.sql', 'installer', '*.png']},

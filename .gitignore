@@ -1,5 +1,7 @@
 __pycache__/
 .env/
+.venv/
+venv/
 *.pyc
 
 archives/
