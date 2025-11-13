@@ -95,7 +95,7 @@ def cmd() -> None:
     try:
         router.query()
     except RouterError as e:
-        print(f"Error: {e}")
+        print(f"Router error: {e}")
 
 
 

@@ -68,10 +68,11 @@ options = [
     "Keywords=geninstaller;",
 ]
 
-# you can add your own PyPI dependencies here if you want:
-dependencies = [
-    'geninstaller>=2.0.0;<3.0.0',  # do not remove this line.
-]
+# optionnal pre installation/uninstallation script files
+pre_install = ""
+post_install = ""
+pre_uninstall = ""
+post_uninstall = ""
 
 # you're done ! :)
 
@@ -80,73 +81,52 @@ dependencies = [
 
 
 import os
-import sys
-import pkg_resources
+import subprocess
 
 
-# dependencies check
-version = sys.version_info  # user's python version
+# geninstaller version check
+min_required_version = "2.0.0"
+
+def version_from_string(v: str) -> tuple:
+    return tuple(map(int, (v.split("."))))
+
+def required_version(v1: str, min: str, max: str) -> bool:
+    """Compares two version strings.
+    Returns True if min <= v1 < max, else False."""
+    current_version = version_from_string(v1)
+    min_version = version_from_string(min)
+    max_version = version_from_string(max)
+    return current_version >= min_version and current_version < max_version
+
+installed_pipx = subprocess.run(
+    ["pipx", "list", "--short"],
+    capture_output=True,
+    text=True,
+    check=False
+)
+installed_list = installed_pipx.stdout.strip().splitlines()
+installed_tools = {i: j for i, j in (item.split() for item in installed_list)}
+install_geninstaller_message = f"""
+!! ABORTED !!
+Geninstaller >= {min_required_version} must be installed with pipx before running this installer:
+
+# INSTALLING pipx:
+Ubuntu / Debian		        sudo apt install pipx ou pip install --user pipx
+Fedora / RHEL / CentOS		sudo dnf install pipx
+Arch / Manjaro		        sudo pacman -S pipx
+openSUSE		            sudo zypper install pipx
+
+# INSTALLING geninstaller with pipx:
+$ pipx install geninstaller
+"""
+if not "geninstaller" in installed_tools or not required_version(installed_tools["geninstaller"], min_required_version, "3.0.0"):
+    print(install_geninstaller_message)
+    exit(0)
+
+
+# Installation with geninstaller
+
 this_file = os.path.basename(__file__)
-
-
-def check_pip(test=False):
-    """Checks if pip is installed, if it is not,
-    closes the program with a message"""
-    res = os.popen(f"python{version[0]}.{version[1]} -m pip -V").read().strip()
-    OK = False
-    if res.startswith('pip'):
-        OK = True
-    if not OK or test:
-        this_file = os.path.basename(__file__)
-        message = (
-            "pip is not installed for your main version of python3.\n"
-            "Please install pip first (see below)"
-            ", and then, restart your session "
-            f"before executing './{this_file}' again.\n\n"
-            "   INSTALLING pip:\n"
-            "- DEBIAN (Ubuntu, Linux Mint, etc...):\n"
-            "$ sudo apt install python3-pip\n"
-            "- Fedora, CentOS/RHEL 7+:\n"
-            "$ sudo yum install python3-pip\n"
-            "- ARCH LINUX, Manjaro:\n"
-            "$ sudo pacman -S python-pip\n"
-            "- OPENSUSE:\n"
-            "$ sudo zypper install python3-pip\n"
-            "\n"
-            "Or, for any distribution:\n"
-            "$ wget https://bootstrap.pypa.io/get-pip.py\n"
-            "$ chmod +x get-pip.py\n"
-            "$ sudo python3 get-pip.py\n"
-        )
-        print("\x1b[0;30;33m" + "ABORTED !\n" + "\x1b[0m")
-        print(message)
-        to_send = f"\"Installation Aborted !!\" \"{message}\""
-        os.system(f"notify-send {to_send}")
-        exit()
-
-
-check_pip()
-
-
-def pip_install_dependencies():
-    for dependency in dependencies:
-        dependency = dependency.replace(">", "=").split('=')[0]
-        os.system(
-            f"python{version[0]}.{version[1]} "
-            f"-m pip install --upgrade {dependency} --break-system-packages")
-    print(
-        "\x1b[0;30;32m"  # text is green
-        "Dependencies successfully installed."
-        "\x1b[0m"
-        )
-
-
-try:
-    pkg_resources.require(dependencies)
-except pkg_resources.VersionConflict:  # python3.7/3.8
-    pip_install_dependencies()
-except pkg_resources.DistributionNotFound:  # python3.6/3.9
-    pip_install_dependencies()
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -161,20 +141,19 @@ datas = {
     "base_dir": BASE_DIR,
     "exec_options": exec_options,
     "options": options,
+    "pre_install": pre_install,
+    "post_install": post_install,
+    "pre_uninstall": pre_uninstall,
+    "post_uninstall": post_uninstall,
 }
 
-
-def install():
-    """installs geninstaller's database on the system,
-     if not already installed. Absolutely required !"""
-    from geninstaller.helpers import autoinstall
+def install() -> None:
+    """installs the application with geninstaller"""
     from geninstaller import core
-    autoinstall()
-    # and then, installs your application
     core.install(datas)
 
 
-def main():
+def main() -> None:
     install()
 
 
