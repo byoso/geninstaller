@@ -84,6 +84,9 @@ def cmd() -> None:
             "provides a ready-to-complete-and-use "
             "'installer' template into your current working directory"),
         "_"*78,
+        "RUNNNER",
+        ("install", core.install, "used by the installer scripts, do not use manually"),
+        "_"*78,
         "ABOUT",
         "program: geninstaller",
         f"version: {__version__}",

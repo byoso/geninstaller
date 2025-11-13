@@ -18,8 +18,30 @@ from geninstaller.helpers import (
 from geninstaller.silly_engine import c
 
 
-def install(data):
+def install(**kwargs):
     """Prepares the data before finalization"""
+    if not kwargs.get("query_params"):
+        print("Install aborted: no query_params provided")
+        return
+    data = kwargs["query_params"]
+    for key in data:
+        if key in [
+            "categories",
+            "options",
+        ]:
+            data[key] = data[key].strip("\"").split(";")
+        else:
+            data[key] = data[key].strip("\"")
+        if isinstance(data[key], list):
+            data[key] = [item.replace("<eq>", "=") for item in data[key]]  # to avoid bash issues
+        else:
+            data[key] = data[key].replace("<eq>", "=")  # to avoid bash issues
+        if key in ["terminal"]:
+            if data[key].lower() == "true":
+                data[key] = True
+            else:
+                data[key] = False
+
     # first, some data check
     valid_for_installation(data)
 
