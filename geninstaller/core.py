@@ -6,8 +6,6 @@ applications"""
 
 import os
 
-from flamewok import color as c
-
 from geninstaller.helpers import (
     APP_FILES_DIR,
     APP_DIR,
@@ -17,6 +15,7 @@ from geninstaller.helpers import (
     create_dir,
     valid_for_installation,
 )
+from geninstaller.silly_engine import c
 
 
 def install(data):
@@ -69,14 +68,14 @@ def install(data):
     os.system(f"notify-send \"'{data['name']}' successfully installed\"")
 
 
-def uninstall(name, *args):
-    if len(args) > 0:
-        print(
-            f"{c.warning}To many arguments given{c.end}\n"
-            "If the name of your app contains multiple words, \n"
-            "write it with quotes: 'your app name'"
-            )
-        return
+def uninstall(name):
+    # if len(args) > 0:
+    #     print(
+    #         f"{c.warning}To many arguments given{c.end}\n"
+    #         "If the name of your app contains multiple words, \n"
+    #         "write it with quotes: 'your app name'"
+    #         )
+    #     return
     gi_db = get_db()
     App = gi_db.model("application")
     apps = App.sil.filter(f"name='{name}'")

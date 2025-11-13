@@ -2,7 +2,6 @@
 # coding: utf-8
 import os
 
-from flamewok.cli import cli
 from silly_db.db import DB
 
 from geninstaller import __version__
@@ -17,6 +16,7 @@ from geninstaller.helpers import (
     display_list,
     get_db,
 )
+from geninstaller.silly_engine import Router, RouterError
 
 
 def list(*args):
@@ -31,20 +31,20 @@ def list(*args):
     display_list(apps)
 
 
-def open_geninstaller_dir(*args):
+def open_geninstaller_dir(*args) -> None:
     """Directory where the database is installed localy"""
     if no_db():
         return
     os.system(f"xdg-open {GI_DIR}")
 
 
-def open_apps_dir(*args):
+def open_apps_dir(*args) -> None:
     if no_db():
         return
     os.system(f"xdg-open {APP_FILES_DIR}")
 
 
-def search(name=None, *args):
+def search(name=None, *args) -> None:
     name = name
     if name is None:
         return list()
@@ -58,10 +58,13 @@ def search(name=None, *args):
     display_list(apps)
 
 
-def cmd():
+def cmd() -> None:
+
+    router = Router(name="geninstaller")
+
     routes = [
         "HELP",
-        (["", "-h", "--help"], cli.help, "display this help"),
+        (["", "-h", "--help"], router.display_help, "display this help"),
         "ACTIONS",
         ('list', list, "list the applications installed with geninstaller"),
         ('search <name>', search,
@@ -87,7 +90,13 @@ def cmd():
         "home page : https://github.com/byoso/geninstaller",
 
     ]
-    cli.route(*routes)
+
+    router.add_routes(routes)
+    try:
+        router.query()
+    except RouterError as e:
+        print(f"Error: {e}")
+
 
 
 if __name__ == "__main__":

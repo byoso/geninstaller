@@ -70,7 +70,7 @@ options = [
 
 # you can add your own PyPI dependencies here if you want:
 dependencies = [
-    'geninstaller>=1.2.3',  # do not remove this line.
+    'geninstaller>=2.0.0;<3.0.0',  # do not remove this line.
 ]
 
 # you're done ! :)
@@ -149,8 +149,6 @@ except pkg_resources.DistributionNotFound:  # python3.6/3.9
     pip_install_dependencies()
 
 
-from flamewok.cli import cli
-
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 datas = {
@@ -177,18 +175,7 @@ def install():
 
 
 def main():
-
-    routes = [
-        f"installer program for: {NAME}",
-        "INSTALLATION",
-        ("", install, (
-            f"Install '{NAME}' by simply executing '$ ./{this_file}'"
-            )),
-
-        "HELP",
-        (["-h", "--help"], cli.help, "display this help"),
-    ]
-    cli.route(*routes)
+    install()
 
 
 if __name__ == "__main__":
