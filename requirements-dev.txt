@@ -1,2 +1,1 @@
 -e git+ssh://git@github.com/byoso/geninstaller.git@e45027f904edf03e5bef68a7e9b3b203cb29b1c8#egg=geninstaller
-silly-db==2.0.2

@@ -1,0 +1,57 @@
+#! /usr/bin/env python3
+
+import os
+from pathlib import Path
+from datetime import datetime
+
+from dataclasses import dataclass
+
+from geninstaller.silly_engine.jsondb import JsonDb, Collection
+
+BASE_DIR_PATH = Path(__file__).parent.resolve()
+GI_DIR_PATH = Path.home() / ".local" / "share" / "applications-files" / ".geninstaller"
+DB_FILE_PATH = GI_DIR_PATH / "geninstaller_db.json"
+
+
+@dataclass
+class AppModel:
+    name: str
+    exec: str
+    icon: str
+    desktop_file: str
+    applications_files: str
+    date: str = ""
+    terminal: bool = False
+    categories: str = ""
+    version: str = ""
+    description: str = ""
+    pre_install_file: str = ""
+    post_install_file: str = ""
+    pre_uninstall_file: str = ""
+    post_uninstall_file: str = ""
+    base_dir: str = ""
+    exec_options: str = ""
+    options: str = ""
+    _id: str = ""
+
+    def __post_init__(self) -> None:
+        if not self.date:
+            self.date = str(datetime.now())
+
+
+gdb = JsonDb(DB_FILE_PATH, autosave=True, version="2.0.0")
+Settings: Collection = gdb.collection("_settings")
+Apps : Collection = gdb.collection("applications")
+
+
+if __name__ == "__main__":
+    app = AppModel(name="TestApp",
+                   exec="/usr/bin/testapp",
+                   icon="/usr/share/icons/testapp.png",
+                   desktop_file="/home/user/.local/share/applications/testapp.desktop",
+                   applications_files="/home/user/.local/share/geninstaller/apps/testapp/")
+    # Apps.insert(app)
+    print(Apps)
+    # gdb.drop(Apps)
+    print(Settings.first())
+    print(Apps)

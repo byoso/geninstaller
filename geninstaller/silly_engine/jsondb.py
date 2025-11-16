@@ -23,6 +23,8 @@ print(Truc.get(key))
 
 """
 from __future__ import annotations
+from pathlib import Path
+from dataclasses import is_dataclass, asdict
 
 import json
 import os
@@ -136,7 +138,7 @@ class JsonDb:
     """Interface with a json file"""
 
     def __init__(
-            self, file: str="db.json", autosave: bool=False,
+            self, file: str | Path="db.json", autosave: bool=False,
             version: str="0.0.0", migrations: dict[str, Callable] | None=None,
             width: int=WIDTH
             ) -> None:
@@ -236,8 +238,10 @@ class JsonDb:
         display += '+'+'-'*(width-2) + "+\n"
         return display
 
-    def drop(self, collection_name) -> None:
+    def drop(self, collection_name: str | Collection) -> None:
         """Delete a collection and all its items"""
+        if isinstance(collection_name, Collection):
+            collection_name = collection_name.name
         if collection_name in self.collections:
             del self.collections[collection_name]
             self._autosave()
@@ -251,14 +255,16 @@ class Collection:
         self.data = {}
 
     def __repr__(self) -> str:
-        return f"<{self.name} - objects in collection: {len(self.data)} >"
+        return f"<{self.name} - objects in collection: {len(self.database.collection(self.name).data)}>"
 
     def _autosave(self) -> None:
         if self.database.is_autosaving:
             self.database.save()
 
-    def insert(self, input_data: dict, id=None) -> dict:
+    def insert(self, input_data: dict | Any, id=None) -> dict:
         """Add an item to the collection"""
+        if is_dataclass(input_data) and not isinstance(input_data, type):
+            input_data = asdict(input_data)
         item = Item(input_data, self, id=id)
         self.data[item.id] = item
         self._autosave()
@@ -277,7 +283,9 @@ class Collection:
         return item.data
 
     def delete(self, input_data: dict, id=None) -> None:
-        """Delete an item from the collection"""
+        """Delete an item from the collection
+        e.g: self.delete({"_id": "item_id"})
+        """
         if id is None:
             if input_data.get('_id') is None:
                 raise JsonDbError("The item must have an '_id' key")
@@ -285,7 +293,7 @@ class Collection:
         del self.data[id]
         self._autosave()
 
-    def all(self) -> list[Any]:
+    def all(self) -> list[dict]:
         """Returns all the items of the collection"""
         return self.filter(lambda x: True)
 

@@ -6,10 +6,10 @@ geninstaller"""
 import os
 import stat
 import shutil
-
-from silly_db.db import DB
+from typing import LiteralString
 
 from geninstaller.exceptions import GeninstallerError
+from geninstaller.database import AppModel
 from geninstaller.silly_engine import c
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -46,46 +46,13 @@ def no_forbidden(el) -> None:
         abort(f"forbidden use of ';' in: '{el}'")
 
 
-def autoinstall() -> None:
-    """install the empty database"""
-    if not os.path.exists(DB_FILE):
-        copy_tree(
-            BASE_DIR+'/plop/database', GI_DIR)
-        db = DB(
-            base=GI_DIR,
-            file=DB_FILE,
-            migrations_dir="migrations")
-        db.migrate_all()
-        print("geninstaller database initialized")
-
-
 def set_executable(file) -> None:
     """set a file executable"""
     st = os.stat(file)
     os.chmod(file, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def no_db() -> bool:
-    """check if the database already exists or not"""
-    if not os.path.exists(DB_FILE):
-        print("geninstaller's database has not been initialized.")
-        return True
-    else:
-        return False
-
-
-def get_db():
-    if no_db:
-        autoinstall()
-    gi_db = DB(
-            file=DB_FILE,
-            base=GI_DIR,
-            migrations_dir="migrations"
-        )
-    return gi_db
-
-
-def display_list(apps):
+def display_list(apps: list) -> None:
     """apps are a silly-db Selection"""
     print("="*80)
     print(f"{'Geninstaller: Installed Applications':^80}")
@@ -94,16 +61,17 @@ def display_list(apps):
         print("\nNo geninstaller application found")
         return
     for app in apps:
+        app = AppModel(**app)
         print(
             f"NAME: '{app.name}'\n"
-            f"COMMENTS: {app.comment}\n"
+            f"DESCRIPTION: {app.description}\n"
             f"TERMINAL ?: {app.terminal}\n"
             f"CATEGORIES: {app.categories}"
             )
         print("_"*79 + "|")
 
 
-def clean_dir_name(name):
+def clean_dir_name(name: str) -> LiteralString | str:
     """Cleans up the name for the directory"""
     cleaner = name.strip()
     cleaned_name = ""
@@ -115,58 +83,10 @@ def clean_dir_name(name):
     return cleaned_name
 
 
-def valid_for_installation(data):
-    """Check the datas before copying anything
 
-data = {
-    "name": NAME,
-    "exec": EXECUTABLE,
-    "comment": DESCRIPTION,
-    "terminal": TERMINAL,
-    "icon": ICON,
-    "categories": CATEGORIES,
-    "base_dir": BASE_DIR,
-    "exec_options": exec_options,
-    "options": options,
-}
-
-    """
-    for el in data.values():
-        if type(el) == str:
-            no_forbidden(el)
-    gi_db = get_db()
-    App = gi_db.model("application")
-    app = App.sil.filter(f"name='{data['name']}'")
-    if ("_" in data['name'] or "/" in data['name']
-            or data['name'].startswith(".")):
-        abort(
-            "An app name must NOT contain '_' and '/', "
-            "and must not begin with a '.'")
-
-    if type(data['terminal']) != bool:
-        abort("The 'TERMINAL' value must be a boolean")
-
-    for category in data['categories']:
-        no_forbidden(category)
-    if len(app) > 0:
-        abort(
-            f"An application called '{data['name']}'"
-            " is already installed, change the current application's"
-            f" name, or uninstall the other application first."
-            )
-    # check relative paths
-    base_dir = data['base_dir']
-    exec = os.path.join(base_dir, data['exec'])
-    icon = os.path.join(base_dir, data['icon'])
-    if not os.path.exists(exec):
-        abort("Wrong path to exec")
-    if data['icon'] != '' and not os.path.exists(icon):
-        abort("Wrong path to icon")
-
-
-def create_desktop(datas):
+def create_desktop(datas: dict) -> None:
     """Create the .desktop file and copy it to ~/.local/share/applications"""
-    # compatibilité with old installer version < 1.1.3:
+
     try:
         datas['exec_options']
     except KeyError:
@@ -176,14 +96,14 @@ def create_desktop(datas):
     except KeyError:
         datas['options'] = []
 
-    file_name = datas['applications']
+    file_name = datas['desktop_file']
     destination_dir = datas['applications_files']
     name = datas['name']
     exec = os.path.join(destination_dir, datas['exec'])
     if datas['exec_options'] != "":
         exec += " " + datas['exec_options']
     icon = os.path.join(destination_dir, datas['icon'])
-    comment = datas['comment']
+    comment = datas['description']
     terminal = datas['terminal']
     categories = datas['categories']
     content = (
@@ -205,11 +125,11 @@ def create_desktop(datas):
     set_executable(file_name)
 
 
-def create_dir(datas):
+def create_dir(data: dict) -> None:
     """Copy all the files in the root directory of the app to its
     right place, and ensure that the exec file is set 'executable'"""
-    base_dir = datas['base_dir']
-    destination_dir = datas['applications_files']
+    base_dir = data['base_dir']
+    destination_dir = data['applications_files']
     try:
         shutil.copytree(
             base_dir, destination_dir)
@@ -219,5 +139,5 @@ def create_dir(datas):
             f"already exists before installation{c.end}"
             )
 
-    exec = os.path.join(destination_dir, datas['exec'])
+    exec = os.path.join(destination_dir, data['exec'])
     set_executable(exec)

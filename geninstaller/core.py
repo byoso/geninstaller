@@ -5,20 +5,20 @@
 applications"""
 
 import os
+from dataclasses import asdict
 
 from geninstaller.helpers import (
     APP_FILES_DIR,
     APP_DIR,
-    get_db,
     clean_dir_name,
     create_desktop,
     create_dir,
-    valid_for_installation,
 )
+from geninstaller.database import Apps, AppModel
 from geninstaller.silly_engine import c
 
 
-def install(**kwargs):
+def install(**kwargs) -> None:
     """Prepares the data before finalization"""
     if not kwargs.get("query_params"):
         print("Install aborted: no query_params provided")
@@ -37,13 +37,10 @@ def install(**kwargs):
         else:
             data[key] = data[key].replace("<eq>", "=")  # to avoid bash issues
         if key in ["terminal"]:
-            if data[key].lower() == "true":
+            if data[key].lower() in ["true", "1", "yes"]:
                 data[key] = True
             else:
                 data[key] = False
-
-    # first, some data check
-    valid_for_installation(data)
 
     # transforming datas
     categories = ""
@@ -52,23 +49,30 @@ def install(**kwargs):
     # directory name:
     applications_files = APP_FILES_DIR + clean_dir_name(data['name'])
     # desktop file name:
-    applications = APP_DIR + clean_dir_name(data['name']) + ".desktop"
-    if data['terminal']:
-        terminal = "true"
-    else:
-        terminal = "false"
+    desktop_file = APP_DIR + clean_dir_name(data['name']) + ".desktop"
 
     db_datas = {
         'name': data['name'].strip(),
         'exec': data['exec'],
-        'comment': data['comment'],
-        'terminal': terminal,
+        'description': data['description'],
+        'terminal': data['terminal'],
         'icon': data['icon'],
         'categories': categories,
         'applications_files': applications_files,
-        'applications': applications,
+        'desktop_file': desktop_file,
 
     }
+
+    if Apps.filter(lambda x: x['name'] == data['name']):
+        print(
+            f"{c.warning}Installation aborted: "
+            f"an application named '{data['name']}' "
+            f"has already been installed with Geninstaller.{c.end}"
+            "\nYou can uninstall it and reinstall it if needed."
+
+        )
+        return
+
     all_datas = {
         'base_dir': data['base_dir'],
         'exec_options': data['exec_options'],
@@ -76,9 +80,7 @@ def install(**kwargs):
         **db_datas
     }
     # finallization:
-    gi_db = get_db()
-    App = gi_db.model("application")
-    App.sil.insert(**db_datas)
+    Apps.insert(AppModel(**db_datas))  # validate the data at the same time
     create_dir(all_datas)
     create_desktop(all_datas)
 
@@ -91,17 +93,15 @@ def install(**kwargs):
 
 
 def uninstall(name: str) -> None:
-    gi_db = get_db()
-    App = gi_db.model("application")
-    apps = App.sil.filter(f"name='{name}'")
+    apps = Apps.filter(lambda x: x['name'] == name)
     if len(apps) < 1:
         print(f"'{name}' is not a geninstaller application")
         return
-    app = App.sil.get_id(apps[0].id)
+    app = AppModel(**apps[0])
 
-    os.system(f"rm {app.applications}")
+    os.system(f"rm {app.desktop_file}")
     os.system(f"rm -rf {app.applications_files}")
-    App.sil.delete(f"id={app.id}")
+    Apps.delete(asdict(app))
     print(
         f"{c.success}'{name}' has been successfuly "
         f"removed from your system{c.end}")
