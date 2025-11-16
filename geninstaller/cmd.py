@@ -2,8 +2,6 @@
 # coding: utf-8
 import os
 
-from silly_db.db import DB
-
 from geninstaller import __version__
 from geninstaller import core
 from geninstaller import ploppers
@@ -11,36 +9,22 @@ from geninstaller.plop.gui.gui_installer import install_gui
 from geninstaller.helpers import (
     GI_DIR,
     APP_FILES_DIR,
-    DB_FILE,
-    no_db,
     display_list,
-    get_db,
 )
 from geninstaller.silly_engine import Router, RouterError
+from geninstaller.database import Apps, AppModel
 
 
-def list(*args):
-    if no_db():
-        return
-    db = DB(
-        file=DB_FILE,
-        base=GI_DIR,
-    )
-    App = db.model("application")
-    apps = App.sil.all()
-    display_list(apps)
+def list(*args) -> None:
+    display_list(Apps.all())
 
 
 def open_geninstaller_dir(*args) -> None:
     """Directory where the database is installed localy"""
-    if no_db():
-        return
     os.system(f"xdg-open {GI_DIR}")
 
 
 def open_apps_dir(*args) -> None:
-    if no_db():
-        return
     os.system(f"xdg-open {APP_FILES_DIR}")
 
 
@@ -48,13 +32,7 @@ def search(name=None, *args) -> None:
     name = name
     if name is None:
         return list()
-    if no_db():
-        return
-    db = DB(
-        file=DB_FILE,
-        base=GI_DIR,
-    )
-    apps = db.select(f"* FROM application WHERE name LIKE '%{name}%'")
+    apps = Apps.filter(lambda x: name.lower() in x['name'].lower())
     display_list(apps)
 
 
@@ -72,9 +50,9 @@ def cmd() -> None:
         ('uninstall <name>', core.uninstall, (
             "uninstall an application with its exact name, "
             "use '' if the 'app name' contains a blank space")),
-        "GUI",
-        ('gui', install_gui, "Installs the graphical interface on your system"),
-        "OPEN DIRECTORIES",
+        # "GUI",
+        # ('gui', install_gui, "Installs the graphical interface on your system"),
+        # "OPEN DIRECTORIES",
         ('open', open_apps_dir,
             "open the applications installation directory"),
         ('open database', open_geninstaller_dir,
@@ -103,6 +81,4 @@ def cmd() -> None:
 
 
 if __name__ == "__main__":
-    db = get_db()
-    db.migrate_all()
     cmd()

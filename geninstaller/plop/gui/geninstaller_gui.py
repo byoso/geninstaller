@@ -29,14 +29,16 @@ class AppBox(gtk.HBox):
 
     def uninstall(self, item, pk):
         if not self.safety:
-            app = App.sil.get_id(pk)
-            os.system(f"rm {app.applications}")
+            # app = App.sil.get_id(pk)
+            app = AppModel(**Apps.get(pk))
+            os.system(f"rm {app.desktop_file}")
             os.system(f"rm -rf {app.applications_files}")
             os.system(
                 f"notify-send \"'{app.name}' has been removed"
                 " from your system.\""
             )
-            App.sil.delete(f"id={app.id}")
+            # App.sil.delete(f"id={app.id}")
+            Apps.delete({"_id": app._id})
             self.destroy()
 
     def toggle_sefaty(self, item):
