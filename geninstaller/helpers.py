@@ -162,7 +162,7 @@ def create_venv(data: dict) -> None:
 
     # Create the environment
     builder = venv.EnvBuilder(
-        system_site_packages=True,
+        system_site_packages=True,  # otherwise, packages like GTK won't be accessible
         clear=True,
         with_pip=True,
     )
