@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 
-import os
 from pathlib import Path
 from datetime import datetime
 
@@ -25,6 +24,7 @@ class AppModel:
     categories: str = ""
     version: str = ""
     description: str = ""
+    python_dependencies: str = ""
     pre_install_file: str = ""
     post_install_file: str = ""
     pre_uninstall_file: str = ""

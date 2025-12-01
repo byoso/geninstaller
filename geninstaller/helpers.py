@@ -6,6 +6,9 @@ geninstaller"""
 import os
 import stat
 import shutil
+import subprocess
+import venv
+from pathlib import Path
 from typing import LiteralString
 
 from geninstaller.exceptions import GeninstallerError
@@ -84,28 +87,36 @@ def clean_dir_name(name: str) -> LiteralString | str:
 
 
 
-def create_desktop(datas: dict) -> None:
+def create_desktop(data: dict) -> None:
     """Create the .desktop file and copy it to ~/.local/share/applications"""
 
     try:
-        datas['exec_options']
+        data['exec_options']
     except KeyError:
-        datas['exec_options'] = ""
+        data['exec_options'] = ""
     try:
-        datas['options']
+        data['options']
     except KeyError:
-        datas['options'] = []
+        data['options'] = []
 
-    file_name = datas['desktop_file']
-    destination_dir = datas['applications_files']
-    name = datas['name']
-    exec = os.path.join(destination_dir, datas['exec'])
-    if datas['exec_options'] != "":
-        exec += " " + datas['exec_options']
-    icon = os.path.join(destination_dir, datas['icon'])
-    comment = datas['description']
-    terminal = datas['terminal']
-    categories = datas['categories']
+    file_name = data['desktop_file']
+    destination_dir = data['applications_files']
+    name = data['name']
+
+    # python program with dependencies in venv
+    if data['python_dependencies'] != "":
+        venv_path = os.path.join(destination_dir, ".venv", "bin", "python")
+        exec = f'"{venv_path}" "{os.path.join(destination_dir, data['exec'])}"'
+    else:
+        exec = os.path.join(destination_dir, data['exec'])
+    # exec = os.path.join(destination_dir, data['exec'])
+
+    if data['exec_options'] != "":
+        exec += " " + data['exec_options']
+    icon = os.path.join(destination_dir, data['icon'])
+    comment = data['description']
+    terminal = data['terminal']
+    categories = data['categories']
     content = (
         "[Desktop Entry]\n"
         f"Name={name}\n"
@@ -115,10 +126,10 @@ def create_desktop(datas: dict) -> None:
         f"Terminal={terminal}\n"
         f"Type=Application\n"
         )
-    print(categories)
+
     if categories != "":
         content += f"Categories={categories}\n"
-    for option in datas['options']:
+    for option in data['options']:
         content += f"{option}\n"
     with open(file_name, "w") as file:
         file.write(content)
@@ -141,3 +152,34 @@ def create_dir(data: dict) -> None:
 
     exec = os.path.join(destination_dir, data['exec'])
     set_executable(exec)
+
+
+def create_venv(data: dict) -> None:
+    """Create the virtual environment and install the python dependencies"""
+    dependencies = data.get('python_dependencies', '')
+    app_name = clean_dir_name(data['name'])
+    venv_dir = Path(APP_FILES_DIR, app_name, ".venv")
+
+    # Create the environment
+    builder = venv.EnvBuilder(
+        system_site_packages=True,
+        clear=True,
+        with_pip=True,
+    )
+    builder.create(venv_dir)
+
+    pip_path = venv_dir / "bin" / "pip"
+
+    # Install dependencies
+    for dependency in dependencies.split(";"):
+        dependency = dependency.strip()
+        if not dependency:
+            continue
+
+        req_file = Path(APP_FILES_DIR) / app_name / dependency
+        print("Installing:", req_file)
+
+        subprocess.run([str(pip_path), "install", "-r", str(req_file)], check=True)
+
+
+    print(f"Virtual environment created: {venv_dir.resolve()}")

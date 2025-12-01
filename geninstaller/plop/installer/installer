@@ -59,6 +59,10 @@ CATEGORIES = [
     # "Utility",
 ]
 
+# if your app needs python dependencies, list here the requirements files
+# your program will be installed in a virtual environment with these dependencies
+python_dependencies = []
+
 # ADDITIONAL OPTIONS
 exec_options = ""  # if the exec needs additional options
 
@@ -87,8 +91,8 @@ import subprocess
 # geninstaller version check
 ############################
 
-min_required_version = "1.0.0"  # dev
-# min_required_version = "2.0.0"  # prod
+# geninstaller_min_required_version = "1.0.0"  # dev
+geninstaller_min_required_version = "2.0.0"  # prod
 
 def version_from_string(v: str) -> tuple:
     return tuple(map(int, (v.split("."))))
@@ -111,7 +115,7 @@ installed_list = installed_pipx.stdout.strip().splitlines()
 installed_tools = {i: j for i, j in (item.split() for item in installed_list)}
 install_geninstaller_message = f"""
 !! ABORTED !!
-Geninstaller >= {min_required_version} must be installed with pipx before running this installer:
+Geninstaller >= {geninstaller_min_required_version} must be installed with pipx before running this installer:
 
 # INSTALLING pipx:
 Ubuntu / Debian		        sudo apt install pipx ou pip install --user pipx
@@ -122,7 +126,7 @@ openSUSE		            sudo zypper install pipx
 # INSTALLING geninstaller with pipx:
 $ pipx install geninstaller
 """
-if not "geninstaller" in installed_tools or not required_version(installed_tools["geninstaller"], min_required_version, "3.0.0"):
+if not "geninstaller" in installed_tools or not required_version(installed_tools["geninstaller"], geninstaller_min_required_version, "3.0.0"):
     print(install_geninstaller_message)
     exit(0)
 
@@ -135,33 +139,19 @@ this_file = os.path.basename(__file__)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-data = {
-    "name": NAME,
-    "exec": EXECUTABLE,
-    "comment": DESCRIPTION,
-    "terminal": TERMINAL,
-    "icon": ICON,
-    "categories": CATEGORIES,
-    "base_dir": BASE_DIR,
-    "exec_options": exec_options,
-    "options": options,
-    "pre_install": pre_install,
-    "post_install": post_install,
-    "pre_uninstall": pre_uninstall,
-    "post_uninstall": post_uninstall,
-}
-
 def install() -> None:
     """installs the application with geninstaller"""
-    query_params = f'?name="{NAME}"+exec="{EXECUTABLE}"+comment="{DESCRIPTION}"+' \
+    # building the query parameters
+    query_params = f'?name="{NAME}"+exec="{EXECUTABLE}"+description="{DESCRIPTION}"+' \
         f'terminal="{TERMINAL}"+icon="{ICON}"+categories="{';'.join(CATEGORIES)}"+' \
         f'base_dir="{BASE_DIR}"+exec_options="{exec_options}"+options="{';'.join(options)}"+' \
-        f'pre_install="{pre_install}"+post_install="{post_install}"+' \
-        f'pre_uninstall="{pre_uninstall}"+post_uninstall="{post_uninstall}"'
+        f'pre_install_file="{pre_install}"+post_install_file="{post_install}"+' \
+        f'pre_uninstall_file="{pre_uninstall}"+post_uninstall_file="{post_uninstall}"+' \
+        f'python_dependencies="{";".join(python_dependencies)}"'
     try:
         subprocess.run(
-            # ["geninstaller", "install", query_params],  # prod
-            ["python", "-m", "geninstaller.cmd", "install", query_params],  # dev
+            ["geninstaller", "install", query_params],  # prod
+            # ["python", "-m", "geninstaller.cmd", "_install", query_params],  # dev
             check=True
         )
     except Exception as e:

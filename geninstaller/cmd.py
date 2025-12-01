@@ -63,7 +63,7 @@ def cmd() -> None:
             "'installer' template into your current working directory"),
         "_"*78,
         "RUNNNER",
-        ("install", core.install, "used by the installer scripts, do not use manually"),
+        ("_install", core._install, "used by the installer scripts, do not use manually"),
         "_"*78,
         "ABOUT",
         "program: geninstaller",

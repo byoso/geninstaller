@@ -5,6 +5,8 @@
 applications"""
 
 import os
+import subprocess
+from pathlib import Path
 from dataclasses import asdict
 
 from geninstaller.helpers import (
@@ -13,12 +15,13 @@ from geninstaller.helpers import (
     clean_dir_name,
     create_desktop,
     create_dir,
+    create_venv,
 )
 from geninstaller.database import Apps, AppModel
 from geninstaller.silly_engine import c
 
 
-def install(**kwargs) -> None:
+def _install(**kwargs) -> None:
     """Prepares the data before finalization"""
     if not kwargs.get("query_params"):
         print("Install aborted: no query_params provided")
@@ -50,6 +53,16 @@ def install(**kwargs) -> None:
     applications_files = APP_FILES_DIR + clean_dir_name(data['name'])
     # desktop file name:
     desktop_file = APP_DIR + clean_dir_name(data['name']) + ".desktop"
+    python_dependencies = ""
+    has_python_dependencies = False
+    if data.get('python_dependencies', '') != "":
+        has_python_dependencies = True
+
+    for dependence in data.get('python_dependencies', '').split(";"):
+        if dependence.strip() == "":
+            data['python_dependencies'] = ""
+            break
+        python_dependencies += APP_FILES_DIR + dependence.strip() + ";"
 
     db_datas = {
         'name': data['name'].strip(),
@@ -60,7 +73,7 @@ def install(**kwargs) -> None:
         'categories': categories,
         'applications_files': applications_files,
         'desktop_file': desktop_file,
-
+        'python_dependencies': python_dependencies,
     }
 
     if Apps.filter(lambda x: x['name'] == data['name']):
@@ -84,11 +97,18 @@ def install(**kwargs) -> None:
     create_dir(all_datas)
     create_desktop(all_datas)
 
+    if has_python_dependencies:
+        print("Python dependencies detected, setting up a virtual environment...")
+        create_venv(data)
+
     print(
         f"{c.success}geninstaller has successfuly installed "
         f"'{data['name']}' on your system{c.end}")
     print("please read the geninstaller's help to know how to use it:")
     print("$ geninstaller -h")
+    # force update of the desktop database
+    subprocess.run(["update-desktop-database", str(Path(desktop_file).parent)])
+    # success notification
     os.system(f"notify-send \"'{data['name']}' successfully installed\"")
 
 
