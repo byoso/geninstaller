@@ -150,7 +150,7 @@ def install() -> None:
         f'python_dependencies="{";".join(python_dependencies)}"'
     try:
         subprocess.run(
-            ["geninstaller", "install", query_params],  # prod
+            ["geninstaller", "_install", query_params],  # prod
             # ["python", "-m", "geninstaller.cmd", "_install", query_params],  # dev
             check=True
         )
