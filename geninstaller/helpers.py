@@ -115,7 +115,7 @@ def create_desktop(data: dict) -> None:
         exec += " " + data['exec_options']
     icon = os.path.join(destination_dir, data['icon'])
     comment = data['description']
-    terminal = data['terminal']
+    terminal = "true" if data['terminal'] else "false"
     categories = data['categories']
     content = (
         "[Desktop Entry]\n"
