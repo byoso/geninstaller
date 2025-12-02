@@ -91,7 +91,7 @@ import subprocess
 # geninstaller version check
 ############################
 
-geninstaller_min_required_version = "2.0.0"
+geninstaller_min_required_version = "2.0.3"
 
 def version_from_string(v: str) -> tuple:
     return tuple(map(int, (v.split("."))))

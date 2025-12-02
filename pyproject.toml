@@ -1,0 +1,61 @@
+# test it works
+#   pip install -e .
+# build the package
+#   pip install build
+#   python -m build
+# check with twine
+#   pip install twine
+#   twine check dist/*
+
+# push on testpypi
+#   twine upload --repository testpypi dist/*
+# install from testpypi
+#   pipx install -i https://test.pypi.org/simple/ geninstaller
+
+# push on pypi
+#   twine upload dist/*
+
+
+
+[build-system]
+requires = ["wheel", "setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geninstaller"
+version = "2.0.3"
+description = "Linux universal app installer and manager, in the user's space only"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8"
+authors = [
+  {name = "Vincent Fabre", email = "peigne.plume@gmail.com"},
+]
+keywords= ["install", "installer", "linux"]
+
+classifiers=[
+    "Programming Language :: Python :: 3",
+    "Development Status :: 5 - Production/Stable",
+    "Natural Language :: English",
+]
+dependencies = [
+]
+
+[project.scripts]
+geninstaller = "geninstaller.cmd:cmd"
+
+[project.urls]
+Homepage = "https://github.com/byoso/geninstaller"
+Repository = "https://github.com/byoso/geninstaller"
+
+[tool.setuptools]
+packages = [
+    "geninstaller",
+    "geninstaller.plop",
+    "geninstaller.plop.gui",
+    "geninstaller.plop.installer",
+    "geninstaller.silly_engine",
+    ]
+
+[tool.setuptools.package-data]
+"*" = ['installer', "*.png"]

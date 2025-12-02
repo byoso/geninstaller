@@ -7,7 +7,8 @@ Installs Geninstaller-gui
 
 import os
 
-from geninstaller import core
+from geninstaller.config import DEV_MODE
+
 
 NAME = "geninstaller_gui"
 DESCRIPTION = "Uninstall with only one click your geninstaller applications"
@@ -61,8 +62,8 @@ def install_gui() -> None:
         f'pre_uninstall_file=""+post_uninstall_file=""+' \
         f'python_dependencies=""'
     import subprocess
-    subprocess.run(
-        # ["geninstaller", "_install", query_params],  # prod
-        ["python", "-m", "geninstaller.cmd", "_install", query_params],  # dev
-        check=True
-    )
+
+    if DEV_MODE:
+        subprocess.run(["python", "-m", "geninstaller.cmd", "_install", query_params], check=True)
+    else:
+        subprocess.run(["geninstaller", "_install", query_params], check=True)
