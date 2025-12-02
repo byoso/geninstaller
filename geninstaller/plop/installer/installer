@@ -3,7 +3,7 @@
 
 """
 This fast installer is destined to the developpers who want to create
-their own quick installer, with 'geninstaller'.
+their own quick installer, with 'geninstaller' (https://github.com/byoso/geninstaller).
 Just read the comments and complete the informations asked below,
 the magic will do the rest.
 

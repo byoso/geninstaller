@@ -9,7 +9,7 @@ import os
 
 from geninstaller import core
 
-NAME = "Geninstaller gui"
+NAME = "geninstaller_gui"
 DESCRIPTION = "Uninstall with only one click your geninstaller applications"
 EXECUTABLE = "geninstaller_gui.py"
 ICON = "geninstaller.png"
@@ -39,7 +39,7 @@ options = [
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-datas = {
+data = {
     "name": NAME,
     "exec": EXECUTABLE,
     "comment": DESCRIPTION,
@@ -52,5 +52,17 @@ datas = {
 }
 
 
-def install_gui():
-    core.install(datas)
+def install_gui() -> None:
+
+    query_params = f'?name="{NAME}"+exec="{EXECUTABLE}"+description="{DESCRIPTION}"+' \
+        f'terminal="{TERMINAL}"+icon="{ICON}"+categories="{';'.join(CATEGORIES)}"+' \
+        f'base_dir="{BASE_DIR}"+exec_options="{exec_options}"+options="{';'.join(options)}"+' \
+        f'pre_install_file=""+post_install_file=""+' \
+        f'pre_uninstall_file=""+post_uninstall_file=""+' \
+        f'python_dependencies=""'
+    import subprocess
+    subprocess.run(
+        # ["geninstaller", "_install", query_params],  # prod
+        ["python", "-m", "geninstaller.cmd", "_install", query_params],  # dev
+        check=True
+    )

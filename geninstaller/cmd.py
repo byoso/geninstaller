@@ -50,9 +50,9 @@ def cmd() -> None:
         ('uninstall <name>', core.uninstall, (
             "uninstall an application with its exact name, "
             "use '' if the 'app name' contains a blank space")),
-        # "GUI",
-        # ('gui', install_gui, "Installs the graphical interface on your system"),
-        # "OPEN DIRECTORIES",
+        "GUI",
+        ('gui', install_gui, "Installs the graphical interface on your system"),
+        "OPEN DIRECTORIES",
         ('open', open_apps_dir,
             "open the applications installation directory"),
         ('open database', open_geninstaller_dir,

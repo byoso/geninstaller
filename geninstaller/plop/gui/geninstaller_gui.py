@@ -1,60 +1,93 @@
 #! /usr/bin/env python3
 # -*- coding : utf-8 -*-
 
-import os
+from pathlib import Path
+import shutil
+import subprocess
+
 import gi
-from PIL import Image
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk as gtk
-from gi.repository import Gdk, GdkPixbuf
+from gi.repository import GdkPixbuf
 
-from silly_db.db import DB
+from jsondb import JsonDb, Collection
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = Path.absolute(Path(__file__).parent)
 
-# Database initialized here
-db = DB(
-    file="~/.local/share/applications-files/.geninstaller/gi_db.sqlite3",
-    migrations_dir="~/.local/share/applications-files/.geninstaller/migrations",
+
+def get_apps() -> Collection:
+    db = JsonDb(
+        file=Path("~/.local/share/applications-files/.geninstaller/geninstaller_db.json").expanduser(),
+        autosave=True,
+        version="2.0.0",
     )
-db.migrate_all()
-
-App = db.model("application")
+    apps = db.collection("applications")
+    return apps
 
 
 class AppBox(gtk.HBox):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.safety = True
 
-    def uninstall(self, item, pk):
+    def uninstall(self, item, pk) -> None:
         if not self.safety:
-            # app = App.sil.get_id(pk)
-            app = AppModel(**Apps.get(pk))
-            os.system(f"rm {app.desktop_file}")
-            os.system(f"rm -rf {app.applications_files}")
-            os.system(
-                f"notify-send \"'{app.name}' has been removed"
-                " from your system.\""
+
+            app = get_apps().get(pk)
+            assert app is not None, "Application not found in database."
+
+            # delete the file .desktop
+            desktop_file = Path(app["desktop_file"])
+            desktop_file.unlink(missing_ok=True)
+
+            # Delete the application files folder
+            applications_files = Path(app['applications_files'])
+            shutil.rmtree(applications_files, ignore_errors=True)
+
+            # Remove from database
+            get_apps().delete({"_id": app.get('_id')})
+
+            # Send notification
+            subprocess.run(
+                ["notify-send", f"‘{app.get('name')}’ has been removed from your system."],
+                check=False
             )
-            # App.sil.delete(f"id={app.id}")
-            Apps.delete({"_id": app._id})
             self.destroy()
 
-    def toggle_sefaty(self, item):
+    def toggle_safety(self, item) -> None:
         self.safety = not self.safety
         if not self.safety:
-            self.button.set_opacity(1)
+            self.uninstall_button.set_opacity(1)
         else:
-            self.button.set_opacity(0.5)
+            self.uninstall_button.set_opacity(0.5)
+
+    def run(self, _event, pk) -> None:
+
+        app = get_apps().get(pk)
+        assert app is not None, "Application not found in database."
+        desktop_file = app.get('desktop_file')
+        assert desktop_file is not None, "Desktop file path not found."
+        desktop_file_name = Path(desktop_file).stem
+        subprocess.Popen(["gtk-launch", desktop_file_name])
 
 
 class MainWindow(gtk.Window):
-    def __init__(self):
+    def __init__(self) -> None:
         gtk.Window.__init__(self)
-        self.set_title("Geninstaller GUI")
-        icon_file = os.path.abspath(
-            os.path.join(BASE_DIR, "geninstaller.png"))
+        # HeaderBar
+        header = gtk.HeaderBar()
+        header.set_show_close_button(True)
+        header.props.title = "Geninstaller GUI"
+        self.set_titlebar(header)
+        # refresh button
+        refresh_button = gtk.Button()
+        refresh_image = gtk.Image.new_from_icon_name("view-refresh", gtk.IconSize.BUTTON)
+        refresh_button.set_image(refresh_image)
+        refresh_button.set_always_show_image(True)
+        header.pack_start(refresh_button)
+        refresh_button.connect("clicked", self.refresh)
+
+        icon_file = str((BASE_DIR / "geninstaller.png").resolve())
         self.set_default_icon_from_file(icon_file)
         self.set_size_request(800, 600)
         self.set_resizable(True)
@@ -67,20 +100,28 @@ class MainWindow(gtk.Window):
         self.main_box = gtk.VBox()
         self.viewport.add(self.main_box)
 
-        for app in App.sil.all().order_by("name"):
-            icon_path = os.path.join(app.applications_files, app.icon)
+        self.refresh()
+
+    def refresh(self, *args) -> None:
+        # remove content
+        for child in self.main_box.get_children():
+            child.destroy()
+
+        # rebuild content
+        for app in get_apps().all():
+            icon_path = str(Path(app.get('applications_files', '')) / app.get('icon', ''))
 
             row = AppBox()
-            row.item = gtk.Frame(label=app.name)
+            row.item = gtk.Frame(label=app.get('name'))
             row.item.set_label_align(0.1, 0.5)
             row.item.set_size_request(600, -1)
             row.content = gtk.HBox()
             row.item.add(row.content)
 
             text = (
-                f"- Description: {app.comment}\n- Categories: {app.categories}"
-                f"\n- Terminal ?: {app.terminal}"
-                )
+                f"- Description: {app.get('description')}\n- Categories: {app.get('categories')}"
+                f"\n- Terminal ?: {app.get('terminal')}"
+            )
             row.text = gtk.Label(label=text)
             row.text.set_line_wrap(True)
             row.content.pack_start(row.text, False, False, 0)
@@ -91,28 +132,36 @@ class MainWindow(gtk.Window):
                     64, 64,
                     GdkPixbuf.InterpType.BILINEAR
                 )
-                icon = gtk.Image.new_from_pixbuf(icon_image)
-            except:
-                icon = gtk.Image.new_from_stock(gtk.STOCK_DIALOG_QUESTION, 6)
+                image_widget = gtk.Image.new_from_pixbuf(icon_image)
+            except Exception:
+                image_widget = gtk.Image.new_from_stock(gtk.STOCK_DIALOG_QUESTION, 6)
 
-            row.pack_start(icon, False, False, 10)
+            row.run_button = gtk.Button()
+            row.run_button.set_image(image_widget)
+            row.run_button.set_always_show_image(True)
+
+            row.pack_start(row.run_button, False, False, 10)
             row.pack_start(row.item, False, False, 10)
 
-            row.button = gtk.Button(label="uninstall")
-            row.button.get_style_context().add_class("destructive-action")
+            row.uninstall_button = gtk.Button(label="uninstall")
+            row.uninstall_button.get_style_context().add_class("destructive-action")
 
-            row.button.set_opacity(0.5)
+            row.uninstall_button.set_opacity(0.5)
             row.safety_button = gtk.Button(label="safety")
 
             row.set_margin_end(20)
-            row.button.set_margin_bottom(20)
+            row.uninstall_button.set_margin_bottom(20)
             row.safety_button.set_margin_bottom(20)
-            row.content.pack_end(row.button, False, False, 10)
+            row.content.pack_end(row.uninstall_button, False, False, 10)
             row.content.pack_end(row.safety_button, False, False, 10)
 
-            row.safety_button.connect('clicked', row.toggle_sefaty)
-            row.button.connect('clicked', row.uninstall, app.id)
+            row.run_button.connect('clicked', row.run, app.get('_id'))
+            row.safety_button.connect('clicked', row.toggle_safety)
+            row.uninstall_button.connect('clicked', row.uninstall, app.get('_id'))
+
             self.main_box.pack_start(row, False, False, 5)
+
+        self.main_box.show_all()
 
 
 window = MainWindow()
