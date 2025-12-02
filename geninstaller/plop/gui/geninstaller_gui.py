@@ -77,7 +77,7 @@ class MainWindow(gtk.Window):
         # HeaderBar
         header = gtk.HeaderBar()
         header.set_show_close_button(True)
-        header.props.title = "Geninstaller GUI"
+        header.props.title = "Geninstaller GUI (v2)"
         self.set_titlebar(header)
         # refresh button
         refresh_button = gtk.Button()
@@ -108,7 +108,9 @@ class MainWindow(gtk.Window):
             child.destroy()
 
         # rebuild content
-        for app in get_apps().all():
+        apps = get_apps().all()
+        sorted_apps = sorted(apps, key=lambda x: x['name'].lower())
+        for app in sorted_apps:
             icon_path = str(Path(app.get('applications_files', '')) / app.get('icon', ''))
 
             row = AppBox()

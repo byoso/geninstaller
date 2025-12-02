@@ -62,4 +62,4 @@ Geninstaller only installs applications in the user's space (no sudo required), 
 
 ## known issues to fix
 
-- program names in the installer can not have a space, otherwise the Tui router can't find it (quick solution: just don't do that)
+- program names that contain a space can not be uninstall with the CLI (quick solution: use the GUI instead of the CLI)
