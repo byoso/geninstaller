@@ -15,6 +15,9 @@
 # push on pypi
 #   twine upload dist/*
 
+# clean all
+#   rm -rf dist build *.egg-info
+
 
 
 [build-system]
@@ -23,15 +26,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geninstaller"
-version = "2.0.3"
+version = "2.0.7"
 description = "Linux universal app installer and manager, in the user's space only"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 authors = [
   {name = "Vincent Fabre", email = "peigne.plume@gmail.com"},
 ]
-keywords= ["install", "installer", "linux"]
+keywords= ["install", "installer", "geninstaller", "linux"]
 
 classifiers=[
     "Programming Language :: Python :: 3",

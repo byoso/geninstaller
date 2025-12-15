@@ -3,6 +3,9 @@
 _Universal linux installer system_
 Installs applications in the user's space.
 
+**please read the changelog** at the bottom.
+
+Geninstaller is usually stable, but if you have some issue with geninstaller, try to completely uninstall it and re-install a newer version.
 
 ## For developers and common users
 
@@ -51,15 +54,20 @@ Behind this, the 'installer' script will take care of the requirements, and inst
 #### Limitation (and gain)
 Geninstaller only installs applications in the user's space (no sudo required), the gain is that it makes it compatible with any linux distibution. So, if your application needs to be installed 'system wide', geninstaller is not the tool that you need.
 
+#### How to completely remove Geninstaller ?
+
+[follow this steps](doc/uninstalling_geninstaller.md)
+
 
 ## Changelog
-
+- 2.0.7:
+    - now works with python 3.10+
+- 2.0.6:
+    - geninstaller's folder is now ~/.local/share/geninstaller-applications and not ~/.local/share/applications-files anymore
 - 2.0.0:
+    - BROKEN (should not work on new install, please uninstall and upgrade to 2.0.5)
+    - python version issue: works only with python 3.12+
     - Geninstaller 2 is NOT compatible with the previous Geninstaller, please remove the former one (pip uninstall geninstaller) before using version 2.x.x
     - geninstaller uses no more third party dependencies.
     - python programs are installed with their own virtual env when they require third party libs.
     - geninstaller should be installed with 'pipx install geninstaller'.
-
-## known issues to fix
-
-- program names that contain a space can not be uninstall with the CLI (quick solution: use the GUI instead of the CLI)

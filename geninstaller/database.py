@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from geninstaller.silly_engine.jsondb import JsonDb, Collection
 
 BASE_DIR_PATH = Path(__file__).parent.resolve()
-GI_DIR_PATH = Path.home() / ".local" / "share" / "applications-files" / ".geninstaller"
+GI_DIR_PATH = Path.home() / ".local" / "share" / "geninstaller-applications" / ".geninstaller"
 DB_FILE_PATH = GI_DIR_PATH / "geninstaller_db.json"
 
 

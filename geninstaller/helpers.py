@@ -9,7 +9,6 @@ import shutil
 import subprocess
 import venv
 from pathlib import Path
-from typing import LiteralString
 
 from geninstaller.exceptions import GeninstallerError
 from geninstaller.database import AppModel
@@ -18,13 +17,11 @@ from geninstaller.silly_engine import c
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 GI_DIR = os.path.expanduser(
-    "~/.local/share/applications-files/.geninstaller/")
+    "~/.local/share/geninstaller-applications/.geninstaller/")
 APP_FILES_DIR = os.path.expanduser(
-    "~/.local/share/applications-files/")
+    "~/.local/share/geninstaller-applications/")
 APP_DIR = os.path.expanduser(
     "~/.local/share/applications/")
-DB_FILE = os.path.expanduser(
-    "~/.local/share/applications-files/.geninstaller/gi_db.sqlite3")
 
 
 def copy_tree(src, dst) -> None:
@@ -74,7 +71,7 @@ def display_list(apps: list) -> None:
         print("_"*79 + "|")
 
 
-def clean_dir_name(name: str) -> LiteralString | str:
+def clean_dir_name(name: str) -> str:
     """Cleans up the name for the directory"""
     cleaner = name.strip()
     cleaned_name = ""
@@ -106,13 +103,12 @@ def create_desktop(data: dict) -> None:
     # python program with dependencies in venv
     if data['python_dependencies'] != "":
         venv_path = os.path.join(destination_dir, ".venv", "bin", "python")
-        exec = f'"{venv_path}" "{os.path.join(destination_dir, data['exec'])}"'
+        executable = f'"{venv_path}" "{os.path.join(destination_dir, data["exec"])}"'
     else:
-        exec = os.path.join(destination_dir, data['exec'])
-    # exec = os.path.join(destination_dir, data['exec'])
+        executable = os.path.join(destination_dir, data['exec'])
 
     if data['exec_options'] != "":
-        exec += " " + data['exec_options']
+        executable += " " + data['exec_options']
     icon = os.path.join(destination_dir, data['icon'])
     comment = data['description']
     terminal = "true" if data['terminal'] else "false"
@@ -122,7 +118,7 @@ def create_desktop(data: dict) -> None:
         f"Name={name}\n"
         f"Icon={icon}\n"
         f"Comment={comment}\n"
-        f"Exec={exec}\n"
+        f"Exec={executable}\n"
         f"Terminal={terminal}\n"
         f"Type=Application\n"
         )

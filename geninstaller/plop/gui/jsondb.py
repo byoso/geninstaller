@@ -30,7 +30,7 @@ import json
 import os
 import uuid
 
-from typing import Any, Callable, Self
+from typing import Any, Callable
 
 WIDTH=80
 
@@ -102,7 +102,7 @@ class Item:
         if self.collection.database.is_autosaving:
             self.collection.database.save()
 
-    def set(self, *args: tuple) -> Self:
+    def set(self, *args: tuple) -> Any:
         """args are tuples of (key, value)"""
         try:
             for arg in args:
@@ -114,7 +114,7 @@ class Item:
         self._autosave()
         return self
 
-    def del_attr(self, *args: str) -> Self:
+    def del_attr(self, *args: str) -> Any:
         for arg in args:
             if not type(arg) is str:
                 raise JsonDbError('expected argument type is str')
@@ -123,7 +123,7 @@ class Item:
         self._autosave()
         return self
 
-    def update(self, data) -> Self:
+    def update(self, data) -> Any:
         for key in data:
             self.data[key] = data[key]
         self._autosave()
@@ -206,6 +206,8 @@ class JsonDb:
             json_str = json.dumps(data, indent=2)
         except (TypeError, ValueError) as e:
             raise JsonDbError(e)
+        if not Path(self.file).exists():
+            os.makedirs(os.path.dirname(self.file), exist_ok=True)
         with open(self.file, 'w') as file:
             file.write(json_str)
 
@@ -214,6 +216,8 @@ class JsonDb:
             return
         if os.path.exists(self.file):
             try:
+                if not Path(self.file).exists():
+                    os.makedirs(os.path.dirname(self.file), exist_ok=True)
                 with open(self.file, 'r') as file:
                     data = json.load(file)
             except json.JSONDecodeError:

@@ -17,7 +17,7 @@ BASE_DIR = Path.absolute(Path(__file__).parent)
 
 def get_apps() -> Collection:
     db = JsonDb(
-        file=Path("~/.local/share/applications-files/.geninstaller/geninstaller_db.json").expanduser(),
+        file=Path("~/.local/share/geninstaller-applications/.geninstaller/geninstaller_db.json").expanduser(),
         autosave=True,
         version="2.0.0",
     )

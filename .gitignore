@@ -2,6 +2,7 @@ __pycache__/
 .env
 .venv/
 venv/
+venv310/
 *.pyc
 
 dev/

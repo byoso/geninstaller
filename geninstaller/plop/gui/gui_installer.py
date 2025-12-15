@@ -56,11 +56,11 @@ data = {
 def install_gui() -> None:
 
     query_params = f'?name="{NAME}"+exec="{EXECUTABLE}"+description="{DESCRIPTION}"+' \
-        f'terminal="{TERMINAL}"+icon="{ICON}"+categories="{';'.join(CATEGORIES)}"+' \
-        f'base_dir="{BASE_DIR}"+exec_options="{exec_options}"+options="{';'.join(options)}"+' \
-        f'pre_install_file=""+post_install_file=""+' \
-        f'pre_uninstall_file=""+post_uninstall_file=""+' \
-        f'python_dependencies=""'
+        f'terminal="{TERMINAL}"+icon="{ICON}"+categories="{";".join(CATEGORIES)}"+' \
+        f'base_dir="{BASE_DIR}"+exec_options="{exec_options}"+options="{";".join(options)}"+' \
+        'pre_install_file=""+post_install_file=""+' \
+        'pre_uninstall_file=""+post_uninstall_file=""+' \
+        'python_dependencies=""'
     import subprocess
 
     if DEV_MODE:

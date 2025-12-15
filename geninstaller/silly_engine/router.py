@@ -35,7 +35,7 @@ class Router:
         self._routes = {}
         self._subroutes = {}
         self._help = []
-        self.welcoming = f"\n##### '{self.name}' help "
+        self.welcoming = f"\n##### '{self.name}' "
         self.width = width
         self.logging = True
         self.__datas = {
@@ -105,10 +105,13 @@ class Router:
             raise RouterError("Route building: A route must be a string, list of str, or tuple of str")
 
         # dictionary by legnth of path
-        if not len(path) in self._routes:
+        if path and path == [""]:
+            self._routes[0] = [[incoming_route[1], path, incoming_route[2]]]
+        if path and not len(path) in self._routes:
             self._routes[len(path)] = [[incoming_route[1], path, incoming_route[2]]]
         else:
             self._routes[len(path)].append([incoming_route[1], path, incoming_route[2]])
+
         # log if path is overwritten
         if path in self.__datas["building_paths"]:
             self._routes[len(path)] = list(filter(lambda x: x[1] != path, self._routes[len(path)]))
@@ -131,15 +134,30 @@ class Router:
 
 
     def query(self, query: str | list =sys.argv[1:], method='GET', context={}, query_params=None):
+        query_params_raw = []
+        # find and clean the query_params in the query args
         if isinstance(query, list):
-            try:
-                query = self.separator.join(query)
-            except TypeError:
-                raise RouterError("Bad query: Query must be a string or a list of strings")
-        if query.count(self.query_separator) > 1:
-            raise RouterError(f"Bad query: Query must have only one '{self.query_separator}' separator")
-        path = query.split(self.query_separator)[0].strip().split(self.separator)
-        params = query.split(self.query_separator)[1].strip().split(self.queries_separator) if self.query_separator in query else None
+            for index, arg in enumerate(query):
+                if arg.startswith(self.query_separator):
+                    query_params_raw.append((index, arg))
+            if len(query_params_raw) > 1:
+                raise RouterError(status=400, message=f"Bad query: Query must have only one '{self.query_separator}' separator.")
+            if query_params_raw and query_params_raw[0][0] + 1 < len(query):
+                raise RouterError(status=400, message=f"Bad query: the query parameters are expected to be at the end of the query.")
+
+        if query_params_raw:
+            path = query[:-1]
+            params_raw = [param for param in query_params_raw[0][1].strip(self.query_separator).split(self.queries_separator)]
+            params = {}
+            for param in params_raw:
+                if "=" in param:
+                    key, value = param.split("=")
+                    params[key] = value
+                else:
+                    params[param] = True
+        else:
+            path = query
+            params = {}
 
         if len(path) > 0 and path[0] in self._subroutes:
             return self._subroutes[path[0]].query(path[1:], query_params=params, context=context)
@@ -147,7 +165,7 @@ class Router:
             query_params = {}
             if params:
                 for param in params:
-                    query_params[param.strip().split("=")[0]] = param.strip().split("=")[1]
+                    query_params.update(params)
         if self._routes.get(len(path)) is None:
             raise RouterError(f"Route not found for path: {path}", 404)
         route = self._get_route(path, self._routes.get(len(path)))

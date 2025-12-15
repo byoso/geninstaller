@@ -99,7 +99,7 @@ class Field:
         question = question or self.text
         error_message = self.error_message or error_message
         self.default_message = f"({self._default})" if self._default is not None else ""
-        value = input(f"{question}{"*" if self.required else ""}{self.default_message}{prompt or self.prompt or PROMPT}").strip()
+        value = input(f"{question}{'*' if self.required else ''}{self.default_message}{prompt or self.prompt or PROMPT}").strip()
         value = value if value != "" else None
         if self.typing is not None and value is not None:
             try:
@@ -157,7 +157,7 @@ class ListField:
         error_message = self.error_message or error_message
         print(f"{self.text}{'*' if self.required else ''}")
         for choice in self.choices:
-            print(f"{choice:<5}- {self.choices[choice]["display"]}")
+            print(f"{choice:<5}- {self.choices[choice]['display']}")
         response = Field(
             name="response", text=" ", typing=int, required=self.required, validator=lambda x: x in self.choices,
             prompt=prompt, error_message=error_message).ask()
