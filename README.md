@@ -60,6 +60,8 @@ Geninstaller only installs applications in the user's space (no sudo required), 
 
 
 ## Changelog
+- 2.0.8:
+    - fixed a bug in the installer with python > 3.12
 - 2.0.7:
     - now works with python 3.10+
 - 2.0.6:

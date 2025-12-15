@@ -26,7 +26,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geninstaller"
-version = "2.0.7"
+version = "2.0.8"
 description = "Linux universal app installer and manager, in the user's space only"
 readme = "README.md"
 license = "MIT"

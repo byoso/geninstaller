@@ -1,4 +1,4 @@
-__version__ = "2.0.7"
+__version__ = "2.0.8"
 
 # DO on version change:
 # ! keep the version up to date in:
