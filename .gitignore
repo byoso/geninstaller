@@ -9,6 +9,11 @@ dev/
 fake/
 installer_dev
 icon.png
+pre_install_test.sh
+pre_uninstall_test.sh
+post_install_test.sh
+post_uninstall_test.sh
+
 
 build/
 dist/
