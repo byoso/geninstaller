@@ -6,6 +6,7 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from geninstaller.silly_engine.jsondb import JsonDb, Collection
+from geninstaller.migrations.migrations_2_1 import mig_2_1_0
 
 BASE_DIR_PATH = Path(__file__).parent.resolve()
 GI_DIR_PATH = Path.home() / ".local" / "share" / "geninstaller-applications" / ".geninstaller"
@@ -25,10 +26,9 @@ class AppModel:
     version: str = ""
     description: str = ""
     python_dependencies: str = ""
-    pre_install_file: str = ""
-    post_install_file: str = ""
-    pre_uninstall_file: str = ""
-    post_uninstall_file: str = ""
+    pre_install_script: str = ""
+    post_install_script: str = ""
+    pre_uninstall_script: str = ""
     base_dir: str = ""
     exec_options: str = ""
     options: str = ""
@@ -39,7 +39,9 @@ class AppModel:
             self.date = str(datetime.now())
 
 
-gdb = JsonDb(DB_FILE_PATH, autosave=True, version="2.0.0")
+gdb = JsonDb(DB_FILE_PATH, autosave=True, version="2.1.0", migrations={
+    "2.1.0": mig_2_1_0
+})
 Settings: Collection = gdb.collection("_settings")
 Apps : Collection = gdb.collection("applications")
 

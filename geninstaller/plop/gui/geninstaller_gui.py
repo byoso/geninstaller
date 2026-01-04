@@ -41,11 +41,7 @@ class AppBox(gtk.HBox):
             desktop_file.unlink(missing_ok=True)
 
             # Delete the application files folder
-            applications_files = Path(app['applications_files'])
-            shutil.rmtree(applications_files, ignore_errors=True)
-
-            # Remove from database
-            get_apps().delete({"_id": app.get('_id')})
+            subprocess.run("geninstaller uninstall '{}'".format(app['name']), shell=True, check=True)
 
             # Send notification
             subprocess.run(
@@ -77,7 +73,7 @@ class MainWindow(gtk.Window):
         # HeaderBar
         header = gtk.HeaderBar()
         header.set_show_close_button(True)
-        header.props.title = "Geninstaller GUI (v2)"
+        header.props.title = "Geninstaller GUI (v2.1)"
         self.set_titlebar(header)
         # refresh button
         refresh_button = gtk.Button()

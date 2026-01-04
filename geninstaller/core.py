@@ -1,5 +1,4 @@
 #! /usr/bin/env python3
-# coding: utf-8
 
 """The core of geninstaller consist mostly in install and uninstall
 applications"""
@@ -8,6 +7,7 @@ import os
 import subprocess
 from pathlib import Path
 from dataclasses import asdict
+import shutil
 
 from geninstaller.helpers import (
     APP_FILES_DIR,
@@ -19,6 +19,13 @@ from geninstaller.helpers import (
 )
 from geninstaller.database import Apps, AppModel
 from geninstaller.silly_engine import c
+
+def file_exists(file: str | Path) -> bool:
+    """Verify that all files in the list exist"""
+    if not Path(file).exists():
+        print(f"{c.warning}Error: file '{file}' does not exist.{c.end}")
+        return False
+    return True
 
 
 def _install(**kwargs) -> None:
@@ -63,8 +70,31 @@ def _install(**kwargs) -> None:
             data['python_dependencies'] = ""
             break
         python_dependencies += APP_FILES_DIR + dependence.strip() + ";"
+    # pre/post installation scripts
+    base_dir = data.get('base_dir')
+    if data.get('pre_install_script', '') != "":
+        base_file_path = Path(base_dir, data['pre_install_script'])
+        if not file_exists(base_file_path):
+            print(f"{c.warning}Installation aborted: "
+                  f"pre-installation script '{base_file_path}' not found.{c.end}")
+            return
+        data['pre_install_script'] = str(base_file_path)
+    if data.get('post_install_script', '') != "":
+        base_file_path = Path(base_dir, data['post_install_script'])
+        if not file_exists(base_file_path):
+            print(f"{c.warning}Installation aborted: "
+                  f"post-installation script '{base_file_path}' not found.{c.end}")
+            return
+        data['post_install_script'] = str(Path(applications_files, data['post_install_script']))
+    if data.get('pre_uninstall_script', '') != "":
+        base_file_path = Path(base_dir, data['pre_uninstall_script'])
+        if not file_exists(base_file_path):
+            print(f"{c.warning}Installation aborted: "
+                  f"pre-uninstallation script '{base_file_path}' not found.{c.end}")
+            return
+        data['pre_uninstall_script'] = str(Path(applications_files, data['pre_uninstall_script']))
 
-    db_datas = {
+    db_data = {
         'name': data['name'].strip(),
         'exec': data['exec'],
         'description': data['description'],
@@ -74,6 +104,9 @@ def _install(**kwargs) -> None:
         'applications_files': applications_files,
         'desktop_file': desktop_file,
         'python_dependencies': python_dependencies,
+        'pre_install_script': data.get('pre_install_script', ''),
+        'post_install_script': data.get('post_install_script', ''),
+        'pre_uninstall_script': data.get('pre_uninstall_script', '')
     }
 
     if Apps.filter(lambda x: x['name'] == data['name']):
@@ -90,16 +123,45 @@ def _install(**kwargs) -> None:
         'base_dir': data['base_dir'],
         'exec_options': data['exec_options'],
         'options': data['options'],
-        **db_datas
+        **db_data
     }
+
+    # pre-install script execution
+    if all_datas.get('pre_install_script', None):
+        try:
+            subprocess.run(["chmod", "+x", all_datas['pre_install_script']], check=True)
+            subprocess.run(all_datas['pre_install_script'], shell=True, check=True)
+        except Exception as e:
+            print(f"{c.warning}Installation aborted: "
+                  f"pre-installation script execution failed: {e}"
+                  f"\nInstallation Aborted !{c.end}")
+            return
+        print(f"{c.success}Pre-installation script executed with success.{c.end}")
+
     # finallization:
-    Apps.insert(AppModel(**db_datas))  # validate the data at the same time
+    app_object_in_db = Apps.insert(AppModel(**db_data))  # validate the data at the same time
     create_dir(all_datas)
     create_desktop(all_datas)
 
     if has_python_dependencies:
         print("Python dependencies detected, setting up a virtual environment...")
         create_venv(data)
+
+    # post-install script execution
+    if all_datas.get('post_install_script', None):
+        try:
+            subprocess.run(["chmod", "+x", all_datas['post_install_script']], check=True)
+            subprocess.run(all_datas['post_install_script'], shell=True, check=True)
+        except Exception as e:
+            print(f"{c.warning}Warning: "
+                  f"post-installation script execution failed: {e}"
+                  f"\nInstallation Aborted !{c.end}")
+            # delete the app from the database and abort installation
+            Apps.delete(app_object_in_db)
+            shutil.rmtree(applications_files, ignore_errors=True)
+            os.remove(desktop_file)
+            return
+        print(f"{c.success}Post-installation script executed with success.{c.end}")
 
     print(
         f"{c.success}geninstaller has successfuly installed "
@@ -118,6 +180,25 @@ def uninstall(name: str) -> None:
         print(f"'{name}' is not a geninstaller application")
         return
     app = AppModel(**apps[0])
+
+    # pre-uninstall script execution
+    if app.pre_uninstall_script:
+        try:
+            uninstallation_script_success = True
+            subprocess.run(["chmod", "+x", app.pre_uninstall_script], check=True)
+            subprocess.run(app.pre_uninstall_script, shell=True, check=True)
+        except Exception as e:
+            uninstallation_script_success = False
+        if not uninstallation_script_success:
+            print(f"{c.warning}"
+                    f"pre-uninstall script execution failed !"
+                    f"\nUninstallation continues anyway...{c.end}")
+            subprocess.run(
+                ["notify-send", f"Warning: pre-uninstall script execution failed for '{name}'."],
+                check=False
+            )
+        else:
+            print(f"{c.success}Pre-uninstallation script executed with success.{c.end}")
 
     os.system(f"rm {app.desktop_file}")
     os.system(f"rm -rf {app.applications_files}")

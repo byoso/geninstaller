@@ -35,6 +35,10 @@ def search(name=None, *args) -> None:
     apps = Apps.filter(lambda x: name.lower() in x['name'].lower())
     display_list(apps)
 
+def get_version() -> str:
+    print(__version__)
+    return __version__
+
 
 def cmd() -> None:
 
@@ -61,6 +65,7 @@ def cmd() -> None:
         ('plop installer', ploppers.plop_installer,
             "provides a ready-to-complete-and-use "
             "'installer' template into your current working directory"),
+        ("version", get_version, "display the version of geninstaller"),
         "_"*78,
         "RUNNNER",
         ("_install", core._install, "used by the installer scripts, do not use manually"),

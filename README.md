@@ -60,7 +60,9 @@ Geninstaller only installs applications in the user's space (no sudo required), 
 
 
 ## Changelog
--2.0.9:
+- 2.1.0:
+    - pre/post installation scripts and pre uninstall script are working
+- 2.0.9:
     - fixed a bug in the installer's error messages (if missing pipx or geninstaller)
 - 2.0.8:
     - fixed a bug in the installer with python > 3.12

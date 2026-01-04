@@ -26,7 +26,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geninstaller"
-version = "2.0.9"
+version = "2.1.0"
 description = "Linux universal app installer and manager, in the user's space only"
 readme = "README.md"
 license = "MIT"
@@ -54,6 +54,7 @@ Repository = "https://github.com/byoso/geninstaller"
 [tool.setuptools]
 packages = [
     "geninstaller",
+    "geninstaller.migrations",
     "geninstaller.plop",
     "geninstaller.plop.gui",
     "geninstaller.plop.installer",

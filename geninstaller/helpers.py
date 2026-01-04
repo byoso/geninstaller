@@ -166,6 +166,8 @@ def create_venv(data: dict) -> None:
 
     pip_path = venv_dir / "bin" / "pip"
 
+    # upgrade pip
+    subprocess.run([str(pip_path), "install", "--upgrade", "pip"], check=True)
     # Install dependencies
     for dependency in dependencies.split(";"):
         dependency = dependency.strip()

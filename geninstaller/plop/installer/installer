@@ -24,19 +24,19 @@ independent.
 
 # choose a good name, do NOT use underscores here
 NAME = "fake"
-# short description (optionnal), a few words would be fine
+# short description (optional), a few words would be fine
 DESCRIPTION = "A short description"
 # The main executable file of the application
 # The path is relative to this directory (BASE_DIR defined below)
 EXECUTABLE = "fake/fake.py"
-# The icon that your system will use (optionnal, but so much better)
+# The icon that your system will use (optional, but so much better)
 # The path is relative to this directory (BASE_DIR defined below)
 ICON = "fake/icon.png"
 # Does your application needs to appear within a terminal ?
 # (usually, a graphical application doesn't need a terminal)
 TERMINAL = False
 
-# Just uncomment the categories in which you want your app to appear in (optionnal).
+# Just uncomment the categories in which you want your app to appear in (optional).
 # If you need to know more (expert), read this:
 # freedesktop.org doc for categories
 # https://specifications.freedesktop.org/menu-spec/latest/apa.html#main-category-registry
@@ -60,7 +60,7 @@ CATEGORIES = [
 
 # if your app needs python dependencies, list here the requirements files
 # your program will be installed in a virtual environment with these dependencies
-python_dependencies = []
+python_dependencies = []  # e.g. ["requirements.txt"]
 
 # ADDITIONAL OPTIONS
 exec_options = ""  # if the exec needs additional options
@@ -71,11 +71,10 @@ options = [
     "Keywords=geninstaller;",
 ]
 
-# optionnal pre installation/uninstallation script files [!! NOT IMPLEMENTED YET !!]
-pre_install = ""
-post_install = ""
-pre_uninstall = ""
-post_uninstall = ""
+# optional pre installation/uninstallation script files (e.g. "scripts/pre_install.sh")
+pre_install_script = ""
+post_install_script = ""
+pre_uninstall_script = ""
 
 # you're done ! :)
 
@@ -91,7 +90,7 @@ import subprocess
 ############################
 
 # geninstaller_min_required_version = "1.0.0"  # dev
-geninstaller_min_required_version = "2.0.8"  # prod
+geninstaller_min_required_version = "2.1.0"  # prod
 
 def version_from_string(v: str) -> tuple:
     return tuple(map(int, (v.split("."))))
@@ -161,8 +160,8 @@ def install() -> None:
     query_params = f'?name="{NAME}"+exec="{EXECUTABLE}"+description="{DESCRIPTION}"+' \
         f'terminal="{TERMINAL}"+icon="{ICON}"+categories="{";".join(CATEGORIES)}"+' \
         f'base_dir="{BASE_DIR}"+exec_options="{exec_options}"+options="{";".join(options_formated)}"+' \
-        f'pre_install_file="{pre_install}"+post_install_file="{post_install}"+' \
-        f'pre_uninstall_file="{pre_uninstall}"+post_uninstall_file="{post_uninstall}"+' \
+        f'pre_install_script="{pre_install_script}"+post_install_script="{post_install_script}"+' \
+        f'pre_uninstall_script="{pre_uninstall_script}+' \
         f'python_dependencies="{";".join(python_dependencies)}"'
     try:
         subprocess.run(
