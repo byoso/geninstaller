@@ -1,19 +1,50 @@
 #! /usr/bin/env python3
 
+"""
+file version: 1.0.0
+A router for command line applications
+"""
+
 import sys
 from typing import Any
 
 WIDTH=80
 
+def text_chunks(s: str, size: int) -> list[str]:
+    return [s[i:i+size] for i in range(0, len(s), size)]
+
+
+def _formatting_incoming_route_width(incoming_route, width) -> str:
+    if len(str(incoming_route[0])) < width // 3:
+        left = width // 3
+    elif len(str(incoming_route[0])) < width // 2:
+        left = width // 2
+    else:
+        left = len(str(incoming_route[0])) + 2
+    total_left = left + 6
+    rest_right = width - total_left
+    display_right = str(incoming_route[2])
+    raw_chunks = text_chunks(display_right, rest_right)
+    display_chunks = []
+    for chunk in raw_chunks:
+        if chunk != raw_chunks[-1]:
+            display_chunks.append(chunk + "\n" + " " * total_left)
+        else:
+            display_chunks.append(chunk)
+
+    display = f"- {str(incoming_route[0]):<{left}} -> " + "".join(display_chunks)
+    return display
+
+
 class RouterError(Exception):
-    def __init__(self, message: str="Router Error", status: int | None=None, *args, **kwargs):
+    def __init__(self, message: str="Router Error", status: int | None=None, *args, **kwargs) -> None:
         self.status = status
         self.message = message
         super().__init__({'status': self.status, 'message': self.message})
 
 
 class Subrouter:
-    def __init__(self, prefix, router, description):
+    def __init__(self, prefix, router, description) -> None:
         self.prefix = prefix
         self.router = router
         self.description = description
@@ -27,7 +58,7 @@ class Router:
             separator: str=" ",
             query_separator="?",
             queries_separator="+",
-            width=WIDTH):
+            width=WIDTH) -> None:
         self.name = name
         self.separator = separator
         self.query_separator = query_separator
@@ -80,7 +111,9 @@ class Router:
             if not isinstance(incoming_route[2], str):
                 raise RouterError(
                     "Route building: The 3rd element of a route must be a string as a description for the help")
-            self._help.append(f"- {str(incoming_route[0]):<50} -> {str(incoming_route[2])}")
+            route_to_display = _formatting_incoming_route_width(incoming_route, self.width)
+            # self._help.append(f"- {str(incoming_route[0]):<50} -> {str(incoming_route[2])}")
+            self._help.append(route_to_display)
         else:
             incoming_route.append("")
         if not callable(incoming_route[1]):
@@ -88,7 +121,7 @@ class Router:
         self._build_route(incoming_route)
 
     @property
-    def logs(self):
+    def logs(self) -> list[Any]:
         logs = self.__datas["logs"]
         self.__datas["logs"] = []
         return logs

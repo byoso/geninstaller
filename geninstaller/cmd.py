@@ -42,33 +42,33 @@ def get_version() -> str:
 
 def cmd() -> None:
 
-    router = Router(name="geninstaller")
+    router = Router(name="geninstaller", width=80)
 
     routes = [
         "HELP",
-        (["", "-h", "--help"], router.display_help, "display this help"),
+        (["", "-h", "--help"], router.display_help, "show this help\n"),
         "ACTIONS",
-        ('list', list, "list the applications installed with geninstaller"),
+        ('list', list, "list the apps installed with geninstaller"),
         ('search <name>', search,
             "search an application with an approximate name"),
         ('uninstall <name>', core.uninstall, (
             "uninstall an application with its exact name, "
-            "use '' if the 'app name' contains a blank space")),
+            "  use '' if the 'app name' contains a blank space")),
         "GUI",
-        ('gui', install_gui, "Installs the graphical interface on your system"),
+        ('gui', install_gui, "Installs the geninstaller's graphical interface on your system\n"),
         "OPEN DIRECTORIES",
         ('open', open_apps_dir,
             "open the applications installation directory"),
         ('open database', open_geninstaller_dir,
-            "open the geninstaller's database directory"),
+            "open the geninstaller's database directory\n"),
         "FOR DEVELOPPERS",
         ('plop installer', ploppers.plop_installer,
             "provides a ready-to-complete-and-use "
             "'installer' template into your current working directory"),
-        ("version", get_version, "display the version of geninstaller"),
+        ("version", get_version, "display the version of geninstaller\n"),
         "_"*78,
         "RUNNNER",
-        ("_install", core._install, "used by the installer scripts, do not use manually"),
+        ("_install", core._install, "used by the 'installer' scripts only, do not use this route manually"),
         "_"*78,
         "ABOUT",
         "program: geninstaller",

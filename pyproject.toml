@@ -4,8 +4,8 @@
 #   pip install build
 #   python -m build
 # check with twine
-#   pip install twine
-#   twine check dist/*
+#   python -m pip install twine
+#   python -m twine check dist/*
 
 # push on testpypi
 #   twine upload --repository testpypi dist/*
@@ -19,30 +19,30 @@
 #   rm -rf dist build *.egg-info
 
 
-
 [build-system]
-requires = ["wheel", "setuptools"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "geninstaller"
-version = "2.1.0"
+version = "2.1.1"
+dynamic = []
 description = "Linux universal app installer and manager, in the user's space only"
 readme = "README.md"
-license = "MIT"
+#license = "MIT"
 requires-python = ">=3.10"
 authors = [
   {name = "Vincent Fabre", email = "peigne.plume@gmail.com"},
 ]
-keywords= ["install", "installer", "geninstaller", "linux"]
+keywords = ["install", "installer", "geninstaller", "linux"]
 
-classifiers=[
+classifiers = [
     "Programming Language :: Python :: 3",
     "Development Status :: 5 - Production/Stable",
     "Natural Language :: English",
 ]
-dependencies = [
-]
+
+dependencies = []
 
 [project.scripts]
 geninstaller = "geninstaller.cmd:cmd"
@@ -59,7 +59,7 @@ packages = [
     "geninstaller.plop.gui",
     "geninstaller.plop.installer",
     "geninstaller.silly_engine",
-    ]
+]
 
 [tool.setuptools.package-data]
-"*" = ['installer', "*.png"]
+"*" = ["installer", "*.png"]
