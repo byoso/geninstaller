@@ -13,7 +13,7 @@
 #   pipx install -i https://test.pypi.org/simple/ geninstaller
 
 # push on pypi
-#   twine upload dist/*
+#   python -m twine upload dist/*
 
 # clean all
 #   rm -rf dist build *.egg-info
@@ -25,7 +25,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geninstaller"
-version = "2.1.1"
+version = "2.1.2"
 dynamic = []
 description = "Linux universal app installer and manager, in the user's space only"
 readme = "README.md"

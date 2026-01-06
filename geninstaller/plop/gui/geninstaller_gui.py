@@ -4,7 +4,6 @@
 from pathlib import Path
 import shutil
 import subprocess
-from typing import Type
 
 import gi
 gi.require_version("Gtk", "3.0")
@@ -14,14 +13,32 @@ from gi.repository import GdkPixbuf
 from jsondb import JsonDb, Collection
 
 BASE_DIR = Path.absolute(Path(__file__).parent)
-VERSION = "2.1.1"
+VERSION = "2.1.2"
 
+GENINSTALLER_LIB_PATH = shutil.which("geninstaller")
+
+if not GENINSTALLER_LIB_PATH:
+    # fallback pipx default paths
+    fallback_paths = [
+        Path.home() / ".local/bin/geninstaller",                  # Ubuntu / Debian / Mint
+        Path.home() / ".local/share/pipx/bin/geninstaller",       # Fedora / Arch / openSUSE
+        Path("/usr/local/bin/geninstaller"),                      # Ubuntu / Debian / Fedora (if global pipx)
+        Path("/usr/bin/geninstaller"),                            # Arch / openSUSE / (if global pipx)
+    ]
+    for p in fallback_paths:
+        if p.exists():
+            GENINSTALLER_LIB_PATH = str(p)
+            break
+
+if not GENINSTALLER_LIB_PATH:
+    raise FileNotFoundError("Cannot find geninstaller executable")
 
 def get_apps() -> Collection:
+    """Get the applications collection from the JSON database. Read only, Never write to it from the gui."""
     db = JsonDb(
         file=Path("~/.local/share/geninstaller-applications/.geninstaller/geninstaller_db.json").expanduser(),
         autosave=False,
-        version="2.0.0",
+        version="0.0.0",  # dummy version, avoid migration from here
     )
     apps = db.collection("applications")
     return apps
@@ -37,9 +54,9 @@ class AppBox(gtk.HBox):
 
             app = get_apps().get(pk)
             assert app is not None, "Application not found in database."
-
             # Delete the application files folder
-            subprocess.run("geninstaller uninstall '{}'".format(app['name']), shell=True, check=True)
+            command = [GENINSTALLER_LIB_PATH, "uninstall", app["name"]]
+            subprocess.run(command, check=True)
 
             # Send notification
             subprocess.run(
