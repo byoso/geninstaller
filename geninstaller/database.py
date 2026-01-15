@@ -25,6 +25,7 @@ class AppModel:
     categories: str = ""
     version: str = ""
     description: str = ""
+    python_required_version: str = ""
     python_dependencies: str = ""
     pre_install_script: str = ""
     post_install_script: str = ""

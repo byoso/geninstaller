@@ -150,34 +150,87 @@ def create_dir(data: dict) -> None:
     set_executable(exec)
 
 
+def has_ensurepip(python_bin: str) -> bool:
+    """Return True if the given Python binary has ensurepip available."""
+    try:
+        subprocess.run(
+            [python_bin, "-m", "ensurepip", "--version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=True
+        )
+        return True
+    except subprocess.CalledProcessError:
+        return False
+    except FileNotFoundError:
+        return False
+
+
 def create_venv(data: dict) -> None:
-    """Create the virtual environment and install the python dependencies"""
+    """Create the virtual environment and install the Python dependencies"""
     dependencies = data.get('python_dependencies', '')
     app_name = clean_dir_name(data['name'])
     venv_dir = Path(APP_FILES_DIR, app_name, ".venv")
 
-    # Create the environment
-    builder = venv.EnvBuilder(
-        system_site_packages=True,  # otherwise, packages like GTK won't be accessible
-        clear=True,
-        with_pip=True,
-    )
-    builder.create(venv_dir)
+    # Remove existing venv to ensure clean creation
+    if venv_dir.exists():
+        shutil.rmtree(venv_dir)
 
-    pip_path = venv_dir / "bin" / "pip"
+    python_bin = data.get('python_required_version', 'python3')
+    if not python_bin:  # None or empty string
+        python_bin = "python3"
 
-    # upgrade pip
-    subprocess.run([str(pip_path), "install", "--upgrade", "pip"], check=True)
-    # Install dependencies
-    for dependency in dependencies.split(";"):
-        dependency = dependency.strip()
-        if not dependency:
-            continue
+    # Check if ensurepip is available
+    can_use_ensurepip = has_ensurepip(python_bin)
 
-        req_file = Path(APP_FILES_DIR) / app_name / dependency
-        print("Installing:", req_file)
+    venv_command = [
+        python_bin,
+        "-m", "venv",
+        "--clear",
+        "--system-site-packages",
+        str(venv_dir),
+    ]
 
-        subprocess.run([str(pip_path), "install", "-r", str(req_file)], check=True)
+    # If ensurepip is missing, create venv without pip
+    if not can_use_ensurepip:
+        venv_command.insert(-1, "--without-pip")
 
+    subprocess.run(venv_command, check=True)
 
-    print(f"Virtual environment created: {venv_dir.resolve()}")
+    python_in_venv = venv_dir / "bin" / "python"
+    pip_in_venv = venv_dir / "bin" / "pip"
+
+    if not can_use_ensurepip:
+        print(
+            f"\n⚠️ {c.warning}Warning: using a non-system Python ({python_bin}). {c.end}\n"
+            f"{c.warning}System packages (like gi/GTK) may not be available !{c.end}\n"
+            f"{c.warning}So if your app does not work, just uninstall it.{c.end}\n"
+        )
+
+    # If ensurepip is missing and dependencies exist, install pip manually
+    if not can_use_ensurepip and dependencies:
+        print("Installing pip in non-system / pip-less Python venv...")
+        get_pip_url = "https://bootstrap.pypa.io/get-pip.py"
+        # try ensurepip anyway (might fail on Debian/Ubuntu)
+        subprocess.run([str(python_in_venv), "-m", "ensurepip", "--upgrade"], check=False)
+        # upgrade pip/setuptools/wheel
+        subprocess.run([
+            str(python_in_venv),
+            "-m", "pip", "install", "--upgrade", "pip", "setuptools", "wheel"
+        ], check=True)
+
+    # If pip exists, upgrade pip
+    if pip_in_venv.exists():
+        subprocess.run([str(pip_in_venv), "install", "--upgrade", "pip"], check=True)
+
+    # Install dependencies from requirements files
+    if dependencies and pip_in_venv.exists():
+        for dependency in dependencies.split(";"):
+            dependency = dependency.strip()
+            if not dependency:
+                continue
+
+            req_file = Path(APP_FILES_DIR) / app_name / dependency
+            print("Installing:", req_file)
+
+            subprocess.run([str(pip_in_venv), "install", "-r", str(req_file)], check=True)

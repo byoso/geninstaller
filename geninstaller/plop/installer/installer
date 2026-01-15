@@ -58,6 +58,10 @@ CATEGORIES = [
     # "Utility",
 ]
 
+# PYTHON OPTIONS
+# if ABSOLUTELLY NEEDED, specify the required python version for your app
+# !! LIMITATION: your program will lose access to system packages like gi.repository for sure !!
+python_required_version = ""  # e.g. "3.11"
 # if your app needs python dependencies, list here the requirements files
 # your program will be installed in a virtual environment with these dependencies
 python_dependencies = []  # e.g. ["requirements.txt"]
@@ -83,14 +87,18 @@ pre_uninstall_script = ""
 
 
 import os
+from packaging.version import Version
+from pathlib import Path
+import re
 import subprocess
+import sys
 
 
 # geninstaller version check
 ############################
 
 # geninstaller_min_required_version = "1.0.0"  # dev
-geninstaller_min_required_version = "2.1.0"  # prod
+geninstaller_min_required_version = "2.2.0"  # prod
 
 def version_from_string(v: str) -> tuple:
     return tuple(map(int, (v.split("."))))
@@ -102,6 +110,54 @@ def required_version(v1: str, min: str, max: str) -> bool:
     min_version = version_from_string(min)
     max_version = version_from_string(max)
     return current_version >= min_version and current_version < max_version
+
+def installed_pythons():
+    pythons = {}
+    for path in Path("/usr/bin").glob("python*"):
+        if not path.is_file() or not path.stat().st_mode & 0o111:
+            continue
+        try:
+            out = subprocess.check_output(
+                [str(path), "--version"],
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=1,
+            )
+        except Exception:
+            continue
+        m = re.search(r"Python (\d+\.\d+\.\d+)", out)
+        if m:
+            pythons[str(path)] = Version(m.group(1))
+    return pythons
+
+def select_python(requested: str) -> str | None:
+    requested_v = Version(requested)
+    precision = len(requested.split("."))
+    pythons = installed_pythons()
+    candidates = []
+    # 1) First pass: same major.minor
+    for path, version in pythons.items():
+        if (
+            version.major == requested_v.major
+            and version.minor == requested_v.minor
+        ):
+            # If patch was specified, ensure version >= requested
+            if precision >= 3 and version < requested_v:
+                continue
+            candidates.append((path, version))
+    if candidates:
+        return min(candidates, key=lambda x: x[1])[0]
+    # 2) Fallback: higher minor in same major
+    for path, version in pythons.items():
+        if (
+            version.major == requested_v.major
+            and version.minor > requested_v.minor
+        ):
+            candidates.append((path, version))
+    if candidates:
+        return min(candidates, key=lambda x: x[1])[0]
+    # 3) Nothing acceptable
+    return None
 
 install_geninstaller_message = f"""
 !! ABORTED !!
@@ -118,6 +174,22 @@ install_geninstaller_messge_geninstaller = f"""
 # INSTALLING geninstaller with pipx:
 $ pipx install geninstaller
 """
+python_required_version_missing_message = f"""
+!! Aborted !! '{NAME}' requires python >= {python_required_version},
+no matching python version found on your system, consider installing
+a more recent version before installing this application.
+"""
+
+
+# Checking requirements
+#########################
+# checking python version if needed
+python_version = ""
+if python_required_version:
+    python_version = select_python(python_required_version)
+    if not python_version:
+        print(python_required_version_missing_message)
+        exit(0)
 
 try:
     installed_pipx = subprocess.run(
@@ -162,6 +234,7 @@ def install() -> None:
         f'base_dir="{BASE_DIR}"+exec_options="{exec_options}"+options="{";".join(options_formated)}"+' \
         f'pre_install_script="{pre_install_script}"+post_install_script="{post_install_script}"+' \
         f'pre_uninstall_script="{pre_uninstall_script}+' \
+        f'python_required_version="{python_version}"+' \
         f'python_dependencies="{";".join(python_dependencies)}"'
     try:
         subprocess.run(

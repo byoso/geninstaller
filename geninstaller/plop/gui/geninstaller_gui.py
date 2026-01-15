@@ -13,7 +13,7 @@ from gi.repository import GdkPixbuf
 from jsondb import JsonDb, Collection
 
 BASE_DIR = Path.absolute(Path(__file__).parent)
-VERSION = "2.1.2"
+VERSION = "2.2.1"
 
 GENINSTALLER_LIB_PATH = shutil.which("geninstaller")
 
@@ -114,7 +114,13 @@ class MainWindow(gtk.Window):
         filter_by_combo.set_active(0)
         header.pack_start(filter_by_combo)
         filter_by_combo.connect("changed", self.on_filter_by_changed)
-
+        # open folder button
+        open_folder_button = gtk.Button()
+        open_folder_image = gtk.Image.new_from_icon_name("folder-open", gtk.IconSize.BUTTON)
+        open_folder_button.set_image(open_folder_image)
+        open_folder_button.set_always_show_image(True)
+        header.pack_end(open_folder_button)
+        open_folder_button.connect("clicked", self.open_geninstaller_folder)
 
         icon_file = str((BASE_DIR / "geninstaller.png").resolve())
         self.set_default_icon_from_file(icon_file)
@@ -130,6 +136,10 @@ class MainWindow(gtk.Window):
         self.viewport.add(self.main_box)
 
         self.refresh()
+
+    def open_geninstaller_folder(self, button) -> None:
+        folder_path = Path.home() / ".local/share/geninstaller-applications"
+        subprocess.Popen(["xdg-open", str(folder_path)])
 
     def on_filter_by_changed(self, combo) -> None:
         self.filter_by = combo.get_active_text()

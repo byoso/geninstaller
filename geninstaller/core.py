@@ -143,9 +143,20 @@ def _install(**kwargs) -> None:
     create_dir(all_datas)
     create_desktop(all_datas)
 
-    if has_python_dependencies:
+    if has_python_dependencies or data.get('python_required_version', '') != "":
         print("Python dependencies detected, setting up a virtual environment...")
-        create_venv(data)
+        try:
+            create_venv(data)
+        except Exception as e:
+            print(f"{c.warning}Warning: "
+                  f"virtual environment creation failed: {e}"
+                  f"\nInstallation Aborted !{c.end}")
+            # delete the app from the database and abort installation
+            Apps.delete(app_object_in_db)
+            shutil.rmtree(applications_files, ignore_errors=True)
+            os.remove(desktop_file)
+            return
+        print(f"{c.success}Virtual environment created with success.{c.end}")
 
     # post-install script execution
     if all_datas.get('post_install_script', None):

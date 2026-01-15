@@ -60,6 +60,7 @@ Geninstaller only installs applications in the user's space (no sudo required), 
 
 
 ## Changelog
+- 2.2.0: possibility to choose a specific version of python WITH limitations (you shouldn't need to ever do that unless you know exactly why)
 - 2.1.2: bugfix gui uninstall doesn't work with ubuntu 22.04
 - 2.1.0:
     - pre/post installation scripts and pre uninstall script are working

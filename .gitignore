@@ -13,6 +13,7 @@ pre_install_test.sh
 pre_uninstall_test.sh
 post_install_test.sh
 post_uninstall_test.sh
+requirements-fake.txt
 
 
 build/
