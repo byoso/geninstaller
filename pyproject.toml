@@ -25,7 +25,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "geninstaller"
-version = "2.2.1"
+version = "2.2.2"
 dynamic = []
 description = "Linux universal app installer and manager, in the user's space only"
 readme = "README.md"

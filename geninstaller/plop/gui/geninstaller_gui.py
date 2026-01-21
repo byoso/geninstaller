@@ -13,7 +13,7 @@ from gi.repository import GdkPixbuf
 from jsondb import JsonDb, Collection
 
 BASE_DIR = Path.absolute(Path(__file__).parent)
-VERSION = "2.2.1"
+VERSION = "2.2.2"
 
 GENINSTALLER_LIB_PATH = shutil.which("geninstaller")
 

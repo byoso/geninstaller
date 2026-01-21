@@ -121,6 +121,7 @@ def create_desktop(data: dict) -> None:
         f"Exec={executable}\n"
         f"Terminal={terminal}\n"
         f"Type=Application\n"
+        f"Path={destination_dir}\n"
         )
 
     if categories != "":
